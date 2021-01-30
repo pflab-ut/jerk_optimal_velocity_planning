@@ -69,6 +69,8 @@ int main()
                   << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
                   << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
                   << "   qp_velocity: " << std::setprecision(5) << qp_output.qp_velocity[i]
+                  << "   filtered_acceleration: " << std::setprecision(5) << filtered_acc[i]
+                  << "   qp_acceleration: " << std::setprecision(5) << qp_output.qp_acceleration[i]
                   << "   qp_jerk: " << std::setprecision(5) << qp_output.qp_jerk[i] << std::endl;
 
     return 0;
