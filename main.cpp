@@ -52,12 +52,12 @@ int main()
     QPOptimizer::OptimizerParam param{};
     param.max_accel = 1.0;
     param.min_decel = -1.0;
-    param.max_jerk = 0.9;
-    param.min_jerk = -0.9;
+    param.max_jerk = 0.8;
+    param.min_jerk = -0.8;
     param.smooth_weight = 1.0;
-    param.over_j_weight = 10;
+    param.over_j_weight = 100;
     param.over_a_weight = 1.0;
-    param.over_v_weight = 10.0;
+    param.over_v_weight = 1.0;
     QPOptimizer qp_optimizer(param);
 
     QPOptimizer::QPOutputInfo qp_output;
@@ -68,7 +68,8 @@ int main()
         std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
                   << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
                   << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
-                  << "   qp_velocity: : " << std::setprecision(5) << qp_output.qp_velocity[i] << std::endl;
+                  << "   qp_velocity: " << std::setprecision(5) << qp_output.qp_velocity[i]
+                  << "   qp_jerk: " << std::setprecision(5) << qp_output.qp_jerk[i] << std::endl;
 
     return 0;
 }

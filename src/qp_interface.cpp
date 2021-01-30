@@ -116,14 +116,18 @@ bool QPOptimizer::solve(const double &initial_vel,
     }
 
     // jerk_min/ref_vel[i] < pseudo_jerk[i] - gamma[i] < jerk_max/ref_vel[i]
-    for(unsigned int i=2*N; i<3*N; ++i)
+    for(unsigned int i=2*N; i<3*N-1; ++i)
     {
         const unsigned int j = 2 * N + i;
-        A(i, i-N) = 1.0 / ds;     //  a[i] / ds
+        A(i, i-N)   =  1.0 / ds;  //  a[i] / ds
         A(i, i-N+1) = -1.0 / ds;  // -a[i+1] / ds
         upper_bound[i] = jmax / std::max(ref_vel[i], 1.0);
         lower_bound[i] = jmin / std::max(ref_vel[i], 1.0);
     }
+    // temporary
+    A(3*N, 2*N) = 1.0;
+    upper_bound[3*N] = 0.0;
+    lower_bound[3*N] = 0.0;
 
     // b' = 2a ... (b(i+1) - b(i)) / ds = 2a(i)
     for (unsigned int i = 3 * N; i < 4 * N - 1; ++i) {
@@ -160,6 +164,14 @@ bool QPOptimizer::solve(const double &initial_vel,
         qp_output.qp_velocity[i] = std::sqrt(std::max(optval.at(i), 0.0));
         qp_output.qp_acceleration[i] = optval.at(i+N);
     }
+
+    for(unsigned int i=0; i<N-1; ++i)
+    {
+        double a_current = qp_output.qp_acceleration[i];
+        double a_next    = qp_output.qp_acceleration[i+1];
+        qp_output.qp_jerk[i] = (a_next - a_current) * qp_output.qp_velocity[i] / ds;
+    }
+    qp_output.qp_jerk[N-1] = qp_output.qp_jerk[N-2];
 
     return true;
 }
