@@ -155,7 +155,8 @@ bool QPOptimizer::solve(const double &initial_vel,
     /* execute optimization */
     const auto result = qp_solver_.optimize(P, A, q, lower_bound, upper_bound);
 
-    // [b0, b1, ..., bN, |  a0, a1, ..., aN, | delta0, delta1, ..., deltaN, | sigma0, sigma1, ..., sigmaN]
+    // [b0, b1, ..., bN, |  a0, a1, ..., aN, | delta0, delta1, ..., deltaN, | sigma0, sigma1, ..., sigmaN |
+    // gamma0, gamma1, ..., gammaN]
     const std::vector<double> optval = std::get<0>(result);
 
     qp_output.resize(N);
