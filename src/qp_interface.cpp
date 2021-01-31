@@ -121,8 +121,8 @@ bool QPOptimizer::solve(const double &initial_vel,
         const unsigned int j = 2 * N + i;
         A(i, i-N)   =  1.0 / ds;  //  a[i] / ds
         A(i, i-N+1) = -1.0 / ds;  // -a[i+1] / ds
-        upper_bound[i] = jmax / std::max(ref_vel[i], 1.0);
-        lower_bound[i] = jmin / std::max(ref_vel[i], 1.0);
+        upper_bound[i] = jmax / std::max(ref_vel[i-2*N], 1.0);
+        lower_bound[i] = jmin / std::max(ref_vel[i-2*N], 1.0);
     }
     // temporary
     A(3*N, 2*N) = 1.0;
