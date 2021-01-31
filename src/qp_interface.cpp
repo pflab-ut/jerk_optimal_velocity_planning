@@ -165,6 +165,12 @@ bool QPOptimizer::solve(const double &initial_vel,
         qp_output.qp_acceleration[i] = optval.at(i+N);
     }
 
+    for(unsigned int i=4*N; i<5*N; ++i)
+    {
+       std::cout << "gamma[" << i << "]: " << optval.at(i) << std::endl;
+    }
+
+
     for(unsigned int i=0; i<N-1; ++i)
     {
         double a_current = qp_output.qp_acceleration[i];
