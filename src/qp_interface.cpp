@@ -180,5 +180,16 @@ bool QPOptimizer::solve(const double &initial_vel,
     }
     qp_output.qp_jerk[N-1] = qp_output.qp_jerk[N-2];
 
+
+
+    // jerk_min/ref_vel[i] < pseudo_jerk[i] - gamma[i] < jerk_max/ref_vel[i] を確認したい
+    for (size_t i = 0; i < ref_vel.size() - 1; ++i) {
+        double ai = qp_output.qp_acceleration[i];
+        double ai_next = qp_output.qp_acceleration[i + 1];
+        double p_jerk = (ai_next - ai) / ds;
+        double gamma = optval.at(4*N + i);
+        double refvel_i = ref_vel[i];
+        printf("i = %lu, [%.3f / %.3f = %.3f] < [%.3f - %.3f = %.3f] < [%.3f / %.3f = %.3f]\n", i, jmin, refvel_i, jmin/refvel_i, p_jerk, gamma, p_jerk - gamma, jmax, refvel_i, jmax/refvel_i);
+    }
     return true;
 }
