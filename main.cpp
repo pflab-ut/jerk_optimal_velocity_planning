@@ -55,7 +55,7 @@ int main()
     param.max_jerk = 0.8;
     param.min_jerk = -0.8;
     param.smooth_weight = 0.0;
-    param.over_j_weight = 100000;
+    param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
     QPOptimizer qp_optimizer(param);

@@ -79,7 +79,7 @@ bool QPOptimizer::solve(const double &initial_vel,
     for (unsigned int i = 3 * N; i < 4 * N; ++i)   // over acceleration cost
         P(i, i) += over_a_weight;
 
-    for (unsigned int i = 4 * N; i < 5 * N; ++i)   // over acceleration cost
+    for (unsigned int i = 4 * N; i < 5 * N; ++i)   // over jerk cost
         P(i, i) += over_j_weight;
 
     /**************************************************************/
@@ -119,10 +119,14 @@ bool QPOptimizer::solve(const double &initial_vel,
     for(unsigned int i=2*N; i<3*N-1; ++i)
     {
         const unsigned int j = 2 * N + i;
-        A(i, i-N)   =  1.0 / ds;  //  a[i] / ds
-        A(i, i-N+1) = -1.0 / ds;  // -a[i+1] / ds
+        const unsigned int k = i - N;
+        A(i, k)   = -1.0 / ds;  // -a[i] / ds
+        A(i, k+1) =  1.0 / ds;  //  a[i+1] / ds
+        A(i, j)   = -1.0;       // -gamma[i]
         upper_bound[i] = jmax / std::max(ref_vel[i-2*N], 1.0);
         lower_bound[i] = jmin / std::max(ref_vel[i-2*N], 1.0);
+        std::cout << "upper_bound[" << i-2*N << "]: " << upper_bound[i] << std::endl;
+        std::cout << "lower_bound[" << i-2*N << "]: " << lower_bound[i] << std::endl;
     }
     // temporary
     A(3*N, 2*N) = 1.0;
@@ -168,7 +172,7 @@ bool QPOptimizer::solve(const double &initial_vel,
 
     for(unsigned int i=4*N; i<5*N; ++i)
     {
-       std::cout << "gamma[" << i << "]: " << optval.at(i) << std::endl;
+       std::cout << "gamma[" << i-4*N << "]: " << optval.at(i) << std::endl;
     }
 
 
@@ -188,7 +192,7 @@ bool QPOptimizer::solve(const double &initial_vel,
         double ai_next = qp_output.qp_acceleration[i + 1];
         double p_jerk = (ai_next - ai) / ds;
         double gamma = optval.at(4*N + i);
-        double refvel_i = ref_vel[i];
+        double refvel_i = std::max(ref_vel[i], 1.0);
         printf("i = %lu, [%.3f / %.3f = %.3f] < [%.3f - %.3f = %.3f] < [%.3f / %.3f = %.3f]\n", i, jmin, refvel_i, jmin/refvel_i, p_jerk, gamma, p_jerk - gamma, jmax, refvel_i, jmax/refvel_i);
     }
     return true;
