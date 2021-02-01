@@ -4,6 +4,7 @@
 #include "interpolate.h"
 #include "filter.h"
 #include "qp_interface.h"
+#include "utils.h"
 
 int main()
 {
@@ -72,6 +73,11 @@ int main()
                   << "   filtered_acceleration: " << std::setprecision(5) << filtered_acc[i]
                   << "   qp_acceleration: " << std::setprecision(5) << qp_output.qp_acceleration[i]
                   << "   qp_jerk: " << std::setprecision(5) << qp_output.qp_jerk[i] << std::endl;
+
+    std::string qp_filename = "../result/qp_result.csv";
+    std::string velocity_filename = "../result/reference_velocity.csv";
+    Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
+    Utils::outputResultToFile(qp_filename, position, qp_output.qp_velocity, qp_output.qp_acceleration, qp_output.qp_jerk);
 
     return 0;
 }

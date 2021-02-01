@@ -15,6 +15,7 @@ add_executable(filter_position_optimization main.cpp
                                             src/solver_interface/osqp_interface.cpp
                                             src/solver_interface/csc_matrix_conv.cpp
                                             src/filter.cpp
+                                            src/utils.cpp
                                             src/qp_interface.cpp)
 
 target_link_libraries(filter_position_optimization PRIVATE osqp::osqp)
