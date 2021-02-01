@@ -2,7 +2,7 @@
 
 QPOptimizer::QPOptimizer(const OptimizerParam &param) : param_(param)
 {
-    qp_solver_.updateMaxIter(4000);
+    qp_solver_.updateMaxIter(40000);
     qp_solver_.updateRhoInterval(0);  // 0 means automoatic
     qp_solver_.updateEpsRel(1.0e-4);  // def: 1.0e-4
     qp_solver_.updateEpsAbs(1.0e-4);  // def: 1.0e-4
@@ -64,6 +64,7 @@ bool QPOptimizer::solve(const double &initial_vel,
         q[i] = -1.0;                      // |vmax^2 - b| -> minimize (-bi)
 
     // pseudo jerk: d(ai)/ds -> minimize weight * (a1 - a0)^2
+    /*
     for (unsigned int i = N; i < 2 * N - 1; ++i)
     {
         const double w_x_dsinv = smooth_weight * (1.0 / ds);
@@ -72,6 +73,7 @@ bool QPOptimizer::solve(const double &initial_vel,
         P(i + 1, i) -= w_x_dsinv;
         P(i + 1, i + 1) += w_x_dsinv;
     }
+     */
 
     for (unsigned int i = 2 * N; i < 3 * N; ++i)   // over velocity cost
         P(i, i) += over_v_weight;
@@ -125,13 +127,14 @@ bool QPOptimizer::solve(const double &initial_vel,
         A(i, j)   = -1.0;       // -gamma[i]
         upper_bound[i] = jmax / std::max(ref_vel[i-2*N], 1.0);
         lower_bound[i] = jmin / std::max(ref_vel[i-2*N], 1.0);
-        std::cout << "upper_bound[" << i-2*N << "]: " << upper_bound[i] << std::endl;
-        std::cout << "lower_bound[" << i-2*N << "]: " << lower_bound[i] << std::endl;
     }
     // temporary
+    /*
     A(3*N, 2*N) = 1.0;
+    A(3*N, 5*N-1) = -1.0;
     upper_bound[3*N] = 0.0;
     lower_bound[3*N] = 0.0;
+     */
 
     // b' = 2a ... (b(i+1) - b(i)) / ds = 2a(i)
     for (unsigned int i = 3 * N; i < 4 * N - 1; ++i) {
@@ -170,12 +173,6 @@ bool QPOptimizer::solve(const double &initial_vel,
         qp_output.qp_acceleration[i] = optval.at(i+N);
     }
 
-    for(unsigned int i=4*N; i<5*N; ++i)
-    {
-       std::cout << "gamma[" << i-4*N << "]: " << optval.at(i) << std::endl;
-    }
-
-
     for(unsigned int i=0; i<N-1; ++i)
     {
         double a_current = qp_output.qp_acceleration[i];
@@ -195,5 +192,14 @@ bool QPOptimizer::solve(const double &initial_vel,
         double refvel_i = std::max(ref_vel[i], 1.0);
         printf("i = %lu, [%.3f / %.3f = %.3f] < [%.3f - %.3f = %.3f] < [%.3f / %.3f = %.3f]\n", i, jmin, refvel_i, jmin/refvel_i, p_jerk, gamma, p_jerk - gamma, jmax, refvel_i, jmax/refvel_i);
     }
+
+    const int status_val = std::get<3>(result);
+    if(status_val != 1)
+    {
+        std::cerr << "Optimization failed" << std::endl;
+        std::cerr << "Status Value: " << status_val << std::endl;
+    }
+    else
+        std::cerr << "Optimization Success" << std::endl;
     return true;
 }

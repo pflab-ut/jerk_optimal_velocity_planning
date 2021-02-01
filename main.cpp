@@ -10,7 +10,7 @@ int main()
     /***************************************************/
     /*************** Velocity Profile ******************/
     /***************************************************/
-    const int N = 500;
+    const int N = 300;
     const double initial_vel = 0.5;
     const double initial_acc = 0.0;
     const double ds = 0.1;
@@ -26,9 +26,9 @@ int main()
 
     for(int i=0; i<100; ++i)
         original_vel[i] = 3.0;
-    for(int i=100; i<300; ++i)
+    for(int i=100; i<200; ++i)
         original_vel[i] = 5.0;
-    for(int i=300; i<N; ++i)
+    for(int i=200; i<N; ++i)
         original_vel[i] = 4.0;
     original_vel.back() = 0.0;
 
