@@ -17,13 +17,13 @@ void QPOptimizer::setParam(const OptimizerParam &param)
 bool QPOptimizer::solve(const double &initial_vel,
                         const double &initial_acc,
                         const double &ds,
-                        const std::vector<double> &ref_vel,
-                        const std::vector<double> &max_vel,
-                        const std::vector<double> &ref_acc,
+                        const std::vector<double> &ref_vels,
+                        const std::vector<double> &max_vels,
+                        const std::vector<double> &ref_accs,
                         QPOutputInfo &qp_output)
 {
-    assert(ref_vel.size()==max_vel.size());
-    int N = ref_vel.size();
+    assert(ref_vels.size()==max_vels.size());
+    int N = ref_vels.size();
 
     /*
      * x = [b[0], b[1], ..., b[N] | a[0], a[1], .... a[N] | delta[0], ..., delta[N]
@@ -99,7 +99,7 @@ bool QPOptimizer::solve(const double &initial_vel,
         const unsigned int j = 2 * N + i;
         A(i, i) = 1.0;   // b_i
         A(i, j) = -1.0;  // -delta_i
-        upper_bound[i] = max_vel[i] * max_vel[i];
+        upper_bound[i] = max_vels[i] * max_vels[i];
         lower_bound[i] = 0.0;
     }
 
@@ -108,7 +108,7 @@ bool QPOptimizer::solve(const double &initial_vel,
         const unsigned int j = 2 * N + i;
         A(i, i) = 1.0;   // a_i
         A(i, j) = -1.0;  // -sigma_i
-        if (i != N && max_vel[i - N] < std::numeric_limits<double>::epsilon()) {
+        if (i != N && max_vels[i - N] < std::numeric_limits<double>::epsilon()) {
             upper_bound[i] = 0.0;
             lower_bound[i] = 0.0;
         } else {
@@ -117,16 +117,18 @@ bool QPOptimizer::solve(const double &initial_vel,
         }
     }
 
-    // jerk_min/ref_vel[i] < pseudo_jerk[i] - gamma[i] < jerk_max/ref_vel[i]
+    // Soft Constraint Jerk Limit: jerk_min < pseudo_jerk[i] * ref_vel[i] - gamma[i] < jerk_max
+    // -> jerk_min * ds < (a[i+1] - a[i]) * ref_vel[i] - gamma[i] * ds < jerk_max * ds
     for(unsigned int i=2*N; i<3*N-1; ++i)
     {
+        const double ref_vel = std::max(ref_vels[i-2*N], 1.0);
         const unsigned int j = 2 * N + i;
         const unsigned int k = i - N;
-        A(i, k)   = -1.0 / ds;  // -a[i] / ds
-        A(i, k+1) =  1.0 / ds;  //  a[i+1] / ds
-        A(i, j)   = -1.0;       // -gamma[i]
-        upper_bound[i] = jmax / std::max(ref_vel[i-2*N], 1.0);
-        lower_bound[i] = jmin / std::max(ref_vel[i-2*N], 1.0);
+        A(i, k)   = -ref_vel;  // -a[i] / ds
+        A(i, k+1) =  ref_vel;  //  a[i+1] / ds
+        A(i, j)   = -ds;       // -gamma[i]
+        upper_bound[i] = jmax * ds;
+        lower_bound[i] = jmin * ds;
     }
     // temporary
     /*
@@ -184,12 +186,12 @@ bool QPOptimizer::solve(const double &initial_vel,
 
 
     // jerk_min/ref_vel[i] < pseudo_jerk[i] - gamma[i] < jerk_max/ref_vel[i] を確認したい
-    for (size_t i = 0; i < ref_vel.size() - 1; ++i) {
+    for (size_t i = 0; i < ref_vels.size() - 1; ++i) {
         double ai = qp_output.qp_acceleration[i];
         double ai_next = qp_output.qp_acceleration[i + 1];
         double p_jerk = (ai_next - ai) / ds;
         double gamma = optval.at(4*N + i);
-        double refvel_i = std::max(ref_vel[i], 1.0);
+        double refvel_i = std::max(ref_vels[i], 1.0);
         printf("i = %lu, [%.3f / %.3f = %.3f] < [%.3f - %.3f = %.3f] < [%.3f / %.3f = %.3f]\n", i, jmin, refvel_i, jmin/refvel_i, p_jerk, gamma, p_jerk - gamma, jmax, refvel_i, jmax/refvel_i);
     }
 
