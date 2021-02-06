@@ -18,6 +18,10 @@ public:
                         const std::vector<double>& original_vel,
                         std::vector<double>& filtered_vel,
                         std::vector<double>& filtered_acc);
+
+    void mergeFilteredVelocity(const std::vector<double>& forward_vels,
+                               const std::vector<double>& backeard_vels,
+                               std::vector<double>& merged_vels);
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_FILTER_H

@@ -40,6 +40,8 @@ void Filter::smoothVelocity(const double& ds,
         filtered_acc[i] = current_acc;
     }
 
+    std::vector<double> forward_vels = filtered_vel;
+
     //3. Backward Filter
     filtered_vel.back() = original_vel.back();
     filtered_acc.back() = 0.0;
@@ -70,5 +72,32 @@ void Filter::smoothVelocity(const double& ds,
         filtered_vel[i] = current_vel;
     }
 
-    return;
+    std::vector<double> backward_vels = filtered_vel;
+    std::vector<double> merged_vels;
+    mergeFilteredVelocity(forward_vels, backward_vels, merged_vels);
+    filtered_vel = merged_vels;
 }
+
+void Filter::mergeFilteredVelocity(const std::vector<double> &forward_vels,
+                                   const std::vector<double> &backeard_vels,
+                                   std::vector<double> &merged_vels)
+{
+    double ep = 1e-5;
+    double v0 = forward_vels.front();
+
+    merged_vels.resize(forward_vels.size());
+
+    size_t i = 0;
+    if(backeard_vels.front() < v0 - 1e-6)
+    {
+        while(backeard_vels[i] < forward_vels[i] && i < merged_vels.size())
+        {
+            merged_vels[i] = forward_vels[i];
+            ++i;
+        }
+    }
+
+    for(; i<merged_vels.size(); ++i)
+        merged_vels[i] = (forward_vels[i] < backeard_vels[i]) ? forward_vels[i] : backeard_vels[i];
+}
+
