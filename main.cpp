@@ -5,6 +5,7 @@
 #include "filter.h"
 #include "qp_interface.h"
 #include "utils.h"
+#include "obstacle.h"
 
 int main()
 {
@@ -34,11 +35,31 @@ int main()
     original_vel.back() = 0.0;
 
     /***************************************************/
+    /******************* Obstacle **********************/
+    /***************************************************/
+    const int obs_size = 50;
+    const double obs_v = 2.0;
+    const double dt = 0.1;
+    const double s0 = 10.0;
+    const double t0 = 2.0;
+    Obstacle obs(obs_size, obs_v, dt, s0, t0);
+
+    /***************************************************/
+    /********** Obstacle Filter Velocity ***************/
+    /***************************************************/
+    std::vector<double> obs_filtered_vels;
+    Filter vel_filter;
+    vel_filter.obstacleVelocityLimitFilter(initial_vel, position, original_vel, obs, obs_filtered_vels);
+
+    std::string obs_filtered_filename = "../result/obs_filtered.csv";
+    Utils::outputVelocityToFile(obs_filtered_filename, position, original_vel, obs_filtered_vels);
+
+    /***************************************************/
     /*************** Filter Velocity *******************/
     /***************************************************/
+    /*
     std::vector<double> filtered_vel;
     std::vector<double> filtered_acc;
-    Filter vel_filter;
     vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, original_vel, filtered_vel, filtered_acc);
 
     for(int i=0; i<original_vel.size(); ++i)
@@ -46,10 +67,12 @@ int main()
                   << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
                   << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
                   << "   Acc: " << std::setprecision(5) << filtered_acc[i] << std::endl;
+                  */
 
     /***************************************************/
     /*************** QP Optimization +******************/
     /***************************************************/
+    /*
     QPOptimizer::OptimizerParam param{};
     param.max_accel = 1.0;
     param.min_decel = -1.0;
@@ -78,6 +101,7 @@ int main()
     std::string velocity_filename = "../result/reference_velocity.csv";
     Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
     Utils::outputResultToFile(qp_filename, position, qp_output.qp_velocity, qp_output.qp_acceleration, qp_output.qp_jerk);
+    */
 
     return 0;
 }

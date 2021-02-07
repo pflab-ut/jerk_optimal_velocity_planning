@@ -3,6 +3,10 @@
 
 #include <vector>
 #include <cmath>
+#include <algorithm>
+#include <iostream>
+#include "obstacle.h"
+#include "interpolate.h"
 
 class Filter
 {
@@ -22,6 +26,12 @@ public:
     void mergeFilteredVelocity(const std::vector<double>& forward_vels,
                                const std::vector<double>& backeard_vels,
                                std::vector<double>& merged_vels);
+
+    bool obstacleVelocityLimitFilter(const double& initial_vel,
+                                     const std::vector<double>& input_arclength,
+                                     const std::vector<double>& max_vels,
+                                     const Obstacle& obstacle,
+                                     std::vector<double>& filtered_vels);
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_FILTER_H

@@ -101,3 +101,119 @@ void Filter::mergeFilteredVelocity(const std::vector<double> &forward_vels,
         merged_vels[i] = (forward_vels[i] < backeard_vels[i]) ? forward_vels[i] : backeard_vels[i];
 }
 
+bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
+                                         const std::vector<double>& input_arclength,
+                                         const std::vector<double>& max_vels,
+                                         const Obstacle& obstacle,
+                                         std::vector<double>& filtered_vels)
+{
+    filtered_vels = max_vels;
+    // 1. Compute Intersection Time
+    std::vector<double> intersection_time;
+    std::vector<double> intersection_arclength;
+    for(int i=0; i<obstacle.s_.size(); ++i)
+    {
+        double s_obs = obstacle.s_[i];
+        double min_dist = std::numeric_limits<double>::max();
+        double min_id   = -1;
+        for(int j=0; j<input_arclength.size(); ++j)
+        {
+            double s_ego = input_arclength[j];
+            double dist  = std::fabs(s_ego - s_obs);
+            if(dist < min_dist)
+            {
+                min_dist = dist;
+                min_id = j;
+            }
+        }
+
+        if(min_id < 0)
+        {
+            std::cout << "No Intersection" << std::endl;
+            return false;
+        }
+
+        if(min_dist<0.2)
+        {
+            intersection_time.push_back(obstacle.t_[i]);
+            intersection_arclength.push_back(input_arclength[min_id]);
+        }
+    }
+
+    // 2. Find inner arclength
+    std::vector<double> arclength_inner;
+    auto it_cutin_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](auto x){ return x >= intersection_arclength[0]; });
+    auto it_cutout_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](auto x){ return x > intersection_arclength.back(); });
+    for(auto it = it_cutin_arclength; it!=it_cutout_arclength; ++it)
+        arclength_inner.push_back(*it);
+
+    // 3. interpolate intersection time
+    std::vector<double> time_inner;
+    if(!LinearInterpolate::interpolate(intersection_arclength, intersection_time, arclength_inner, time_inner))
+    {
+        std::cout << "Interpolation Failed" << std::endl;
+        return false;
+    }
+
+    const size_t idx_cutin = std::distance(input_arclength.begin(), it_cutin_arclength);
+    const size_t idx_cutout = std::distance(input_arclength.begin(), it_cutout_arclength);
+
+    //4. Set Velocity Limits
+    size_t N = arclength_inner.size();
+    double t = input_arclength[1]/initial_vel;
+    double range_s_1 = 30; //temporary
+    double range_s_2 = 15; //temporary
+    double range_t = 1; //temporary
+    for(size_t i=1; i < input_arclength.size()-1; ++i)
+    {
+        double v = 0.0;
+        if(std::fabs(max_vels[i]<1e-3))
+            v = max_vels[i];
+        else
+        {
+            if(i > idx_cutout - 1)
+                v = max_vels[i];
+
+            double ds = input_arclength[i+1] - input_arclength[i];
+            double t_tmp = t + ds / max_vels[i];
+            double nearest_s = range_s_1;
+            double nearest_t = range_t;
+            size_t j_nearest = 0;
+
+            // Find nearest Intersection point
+            for(size_t j = 0; j < arclength_inner.size() - 1; ++j)
+            {
+                double delta_s = (arclength_inner[j] - input_arclength[i + 1]);
+                double delta_t = (time_inner[j] - t_tmp);
+                if(delta_s > 0 && delta_t >0)
+                {
+                    if(delta_s < nearest_s && delta_t < nearest_t)
+                    {
+                        nearest_s = delta_s;
+                        nearest_t = delta_t;
+                        j_nearest = j;
+                    }
+                }
+            }
+
+            if(nearest_s < range_s_1 && nearest_t < range_t)
+            {
+                if(nearest_s < range_s_2)
+                    v = (arclength_inner[j_nearest + 1] - arclength_inner[j_nearest]) / (time_inner[j_nearest + 1] - time_inner[j_nearest]);
+                else
+                    v = (arclength_inner[N - 1] - input_arclength[i]) / (time_inner[N - 1] - t);
+                t = t + ds / v;
+            }
+            else
+            {
+                v = max_vels[i];
+                t = t_tmp;
+            }
+
+        }
+        filtered_vels[i] = v;
+    }
+    filtered_vels.back() = 0.0;
+
+    return true;
+}

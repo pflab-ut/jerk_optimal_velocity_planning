@@ -15,6 +15,11 @@ namespace Utils
     void outputVelocityToFile(const std::string& filename,
                               const std::vector<double>& position,
                               const std::vector<double>& original_velocity,
+                              const std::vector<double>& filtered_velocity);
+
+    void outputVelocityToFile(const std::string& filename,
+                              const std::vector<double>& position,
+                              const std::vector<double>& original_velocity,
                               const std::vector<double>& filtered_velocity,
                               const std::vector<double>& filtered_acc);
 
