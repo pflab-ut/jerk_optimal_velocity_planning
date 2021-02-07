@@ -54,25 +54,25 @@ int main()
     std::string obs_filtered_filename = "../result/obs_filtered.csv";
     Utils::outputVelocityToFile(obs_filtered_filename, position, original_vel, obs_filtered_vels);
 
+    std::string st_filename = "../result/st_graph.csv";
+    Utils::outputSTToFile(st_filename, position, original_vel, obs_filtered_vels, obs);
+
     /***************************************************/
     /*************** Filter Velocity *******************/
     /***************************************************/
-    /*
     std::vector<double> filtered_vel;
     std::vector<double> filtered_acc;
-    vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, original_vel, filtered_vel, filtered_acc);
+    vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, obs_filtered_vels, filtered_vel, filtered_acc);
 
     for(int i=0; i<original_vel.size(); ++i)
         std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
                   << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
                   << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
                   << "   Acc: " << std::setprecision(5) << filtered_acc[i] << std::endl;
-                  */
 
     /***************************************************/
     /*************** QP Optimization +******************/
     /***************************************************/
-    /*
     QPOptimizer::OptimizerParam param{};
     param.max_accel = 1.0;
     param.min_decel = -1.0;
@@ -99,9 +99,9 @@ int main()
 
     std::string qp_filename = "../result/qp_result.csv";
     std::string velocity_filename = "../result/reference_velocity.csv";
-    Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
+    //Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
+    Utils::outputVelocityToFile(velocity_filename, position, obs_filtered_vels, filtered_vel, filtered_acc);
     Utils::outputResultToFile(qp_filename, position, qp_output.qp_velocity, qp_output.qp_acceleration, qp_output.qp_jerk);
-    */
 
     return 0;
 }

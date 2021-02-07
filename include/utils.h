@@ -9,6 +9,7 @@
 #include <string>
 #include <fstream>
 #include <cassert>
+#include "obstacle.h"
 
 namespace Utils
 {
@@ -28,6 +29,12 @@ namespace Utils
                             const std::vector<double>& qp_velocity,
                             const std::vector<double>& qp_acceleration,
                             const std::vector<double>& qp_jerk);
+
+    void outputSTToFile(const std::string& filename,
+                        const std::vector<double>& position,
+                        const std::vector<double>& original_vels,
+                        const std::vector<double>& filtered_vels,
+                        const Obstacle& obs);
 }
 
 #endif //FILTER_POSITION_OPTIMIZATION_UTILS_H

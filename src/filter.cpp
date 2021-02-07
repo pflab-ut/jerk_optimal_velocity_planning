@@ -161,8 +161,8 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
     //4. Set Velocity Limits
     size_t N = arclength_inner.size();
     double t = input_arclength[1]/initial_vel;
-    double range_s_1 = 30; //temporary
-    double range_s_2 = 15; //temporary
+    double range_s_1 = 3; //temporary
+    double range_s_2 = 1; //temporary
     double range_t = 1; //temporary
     for(size_t i=1; i < input_arclength.size()-1; ++i)
     {
