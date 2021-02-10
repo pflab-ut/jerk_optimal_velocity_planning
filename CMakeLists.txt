@@ -10,12 +10,16 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(osqp REQUIRED)
 
-add_executable(filter_position_optimization main.cpp
-                                            src/interpolate.cpp
-                                            src/solver_interface/osqp_interface.cpp
-                                            src/solver_interface/csc_matrix_conv.cpp
-                                            src/filter.cpp
-                                            src/utils.cpp
-                                            src/qp_interface.cpp)
+add_library(FILTER_LIB src/interpolate.cpp
+                       src/solver_interface/osqp_interface.cpp
+                       src/solver_interface/csc_matrix_conv.cpp
+                       src/filter.cpp
+                       src/utils.cpp
+                       src/qp_interface.cpp)
+target_link_libraries(FILTER_LIB osqp::osqp)
 
-target_link_libraries(filter_position_optimization PRIVATE osqp::osqp)
+add_executable(filter_position_optimization main.cpp)
+target_link_libraries(filter_position_optimization PRIVATE FILTER_LIB)
+
+add_executable(pseudo_optimization main_pseudo.cpp)
+target_link_libraries(pseudo_optimization PRIVATE FILTER_LIB)

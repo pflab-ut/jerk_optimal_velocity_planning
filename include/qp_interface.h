@@ -61,6 +61,12 @@ public:
                const std::vector<double>& max_vels,
                QPOutputInfo& qp_output);
 
+    bool solve(const double& initial_vel,
+               const double& initial_acc,
+               const double& ds,
+               const std::vector<double>& max_vels,
+               QPOutputInfo& qp_output);
+
 private:
     OptimizerParam param_;
     osqp::OSQPInterface qp_solver_;

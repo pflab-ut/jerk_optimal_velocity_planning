@@ -49,6 +49,25 @@ namespace Utils
         writing_file.close();
     }
 
+    void outputResultToFile(const std::string& filename,
+                            const std::vector<double>& position,
+                            const std::vector<double>& qp_velocity,
+                            const std::vector<double>& qp_acceleration,
+                            const std::vector<double>& qp_jerk,
+                            const std::vector<double>& ref_vels)
+    {
+        std::ofstream writing_file;
+        writing_file.open(filename, std::ios::out);
+        writing_file << "qp_position" <<  "," << "ref_velocity" << "," << "qp_velocity" << "," << "qp_acceleration" << "," << "qp_jerk" << std::endl;
+
+        for(int i=0; i<qp_velocity.size(); ++i)
+            writing_file << position[i] << "," << ref_vels[i] << "," << qp_velocity[i] << ","
+                         << qp_acceleration[i] << "," << qp_jerk[i] << std::endl;
+
+        writing_file.close();
+
+    }
+
     void outputSTToFile(const std::string& filename,
                         const std::vector<double>& position,
                         const std::vector<double>& original_vels,

@@ -30,6 +30,13 @@ namespace Utils
                             const std::vector<double>& qp_acceleration,
                             const std::vector<double>& qp_jerk);
 
+    void outputResultToFile(const std::string& filename,
+                            const std::vector<double>& position,
+                            const std::vector<double>& qp_velocity,
+                            const std::vector<double>& qp_acceleration,
+                            const std::vector<double>& qp_jerk,
+                            const std::vector<double>& ref_vels);
+
     void outputSTToFile(const std::string& filename,
                         const std::vector<double>& position,
                         const std::vector<double>& original_vels,
