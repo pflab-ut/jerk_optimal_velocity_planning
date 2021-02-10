@@ -10,7 +10,7 @@ import os
 if __name__ == '__main__':
     os.chdir('../')
     path = os.getcwd()
-    obs_filtered_data = pd.read_csv(path+"/result/obs_filtered.csv")
+    obs_filtered_data = pd.read_csv(path+"/result/filter_qp/obs_filtered.csv")
 
     fig = plt.figure(figsize=(14, 10))
     plt.ylim([-2.5, 5.5])

@@ -10,7 +10,7 @@ import os
 if __name__ == '__main__':
     os.chdir('../')
     path = os.getcwd()
-    data = pd.read_csv(path+"/result/st_graph.csv")
+    data = pd.read_csv(path+"/result/filter_qp/st_graph.csv")
 
     fig = plt.figure(figsize=(14, 10))
     plt.plot(data['obs_time'], data['obs_s'], label="obstacle", color="red")

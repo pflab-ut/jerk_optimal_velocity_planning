@@ -10,8 +10,8 @@ import os
 if __name__ == '__main__':
     os.chdir('../')
     path = os.getcwd()
-    ref_vel_data = pd.read_csv(path+"/result/reference_velocity.csv")
-    qp_data = pd.read_csv(path+"/result/qp_result.csv")
+    ref_vel_data = pd.read_csv(path+"/result/filter_qp/reference_velocity.csv")
+    qp_data = pd.read_csv(path+"/result/filter_qp/qp_result.csv")
 
     fig = plt.figure(figsize=(14, 10))
     plt.ylim([-2.5, 5.5])

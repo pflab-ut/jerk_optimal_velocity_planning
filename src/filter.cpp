@@ -127,13 +127,7 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
             }
         }
 
-        if(min_id < 0)
-        {
-            std::cout << "No Intersection" << std::endl;
-            return false;
-        }
-
-        if(min_dist<0.2)
+        if(min_id > 0 && min_dist<0.2)
         {
             intersection_time.push_back(obstacle.t_[i]);
             intersection_arclength.push_back(input_arclength[min_id]);
@@ -147,6 +141,17 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
     for(auto it = it_cutin_arclength; it!=it_cutout_arclength; ++it)
         arclength_inner.push_back(*it);
 
+    std::cout << "obs size: " << obstacle.s_.size() << std::endl;
+    std::cout << "intersection size: " << intersection_arclength.size() << std::endl;
+    std::cout << "arclength_inner size: " << arclength_inner.size() << std::endl;
+
+    std::cout << "obs front s: " << obstacle.s_.front() << std::endl;
+    std::cout << "obs last s: " << obstacle.s_.back() << std::endl;
+    std::cout << "intersection front s: " << intersection_arclength.front() << std::endl;
+    std::cout << "intersection last s: " << intersection_arclength.back() << std::endl;
+    std::cout << "inner front s: " << arclength_inner.front() << std::endl;
+    std::cout << "inner back s: " << arclength_inner.back() << std::endl;
+
     // 3. interpolate intersection time
     std::vector<double> time_inner;
     if(!LinearInterpolate::interpolate(intersection_arclength, intersection_time, arclength_inner, time_inner))
@@ -155,25 +160,26 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
         return false;
     }
 
+    std::cout << "intersection last t: " << intersection_time.back() << std::endl;
+    std::cout << "time inner last t: " << time_inner.back() << std::endl;
+
     const size_t idx_cutin = std::distance(input_arclength.begin(), it_cutin_arclength);
     const size_t idx_cutout = std::distance(input_arclength.begin(), it_cutout_arclength);
+    std::cout << "idx cutout: " << idx_cutout << std::endl;
 
     //4. Set Velocity Limits
-    size_t N = arclength_inner.size();
-    double t = input_arclength[1]/initial_vel;
+    //double t = input_arclength[1]/std::max(initial_vel, 0.1);
+    double t = input_arclength[1]/std::max(max_vels[0], 0.1);
     double range_s_1 = 3; //temporary
     double range_s_2 = 1; //temporary
-    double range_t = 1; //temporary
+    double range_t = 0.5; //temporary
     for(size_t i=1; i < input_arclength.size()-1; ++i)
     {
         double v = 0.0;
-        if(std::fabs(max_vels[i]<1e-3))
+        if(std::fabs(max_vels[i]<1e-3) || i > idx_cutout)
             v = max_vels[i];
         else
         {
-            if(i > idx_cutout - 1)
-                v = max_vels[i];
-
             double ds = input_arclength[i+1] - input_arclength[i];
             double t_tmp = t + ds / max_vels[i];
             double nearest_s = range_s_1;
@@ -181,27 +187,30 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
             size_t j_nearest = 0;
 
             // Find nearest Intersection point
-            for(size_t j = 0; j < arclength_inner.size() - 1; ++j)
+            for(size_t j = 0; j < arclength_inner.size(); ++j)
             {
-                double delta_s = (arclength_inner[j] - input_arclength[i + 1]);
-                double delta_t = (time_inner[j] - t_tmp);
-                if(delta_s > 0 && delta_t >0)
+                double delta_s = std::fabs(arclength_inner[j] - input_arclength[i]);
+                double delta_t = std::fabs(time_inner[j] - t_tmp);
+                if(delta_s < nearest_s && delta_t < nearest_t)
                 {
-                    if(delta_s < nearest_s && delta_t < nearest_t)
-                    {
-                        nearest_s = delta_s;
-                        nearest_t = delta_t;
-                        j_nearest = j;
-                    }
+                    nearest_s = delta_s;
+                    nearest_t = delta_t;
+                    j_nearest = j;
                 }
             }
+            std::cout << "i: " << i << std::endl;
+            std::cout << "j_nearest: " << j_nearest << std::endl;
+            std::cout << "input_arclength["<< i << "]: " << input_arclength[i] << std::endl;
+            std::cout << "nearest_s: " << nearest_s << std::endl;
+            std::cout << "nearest_t: " << nearest_t << std::endl;
+            std::cout << "------------------" << std::endl;
 
             if(nearest_s < range_s_1 && nearest_t < range_t)
             {
                 if(nearest_s < range_s_2)
                     v = (arclength_inner[j_nearest + 1] - arclength_inner[j_nearest]) / (time_inner[j_nearest + 1] - time_inner[j_nearest]);
                 else
-                    v = (arclength_inner[N - 1] - input_arclength[i]) / (time_inner[N - 1] - t);
+                    v = (arclength_inner.back() - input_arclength[i]) / (time_inner.back() - t);
                 t = t + ds / v;
             }
             else
@@ -209,7 +218,6 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
                 v = max_vels[i];
                 t = t_tmp;
             }
-
         }
         filtered_vels[i] = v;
     }

@@ -47,14 +47,14 @@ int main()
     /***************************************************/
     /********** Obstacle Filter Velocity ***************/
     /***************************************************/
-    std::vector<double> obs_filtered_vels;
     Filter vel_filter;
+    std::vector<double> obs_filtered_vels;
     vel_filter.obstacleVelocityLimitFilter(initial_vel, position, original_vel, obs, obs_filtered_vels);
 
-    std::string obs_filtered_filename = "../result/obs_filtered.csv";
+    std::string obs_filtered_filename = "../result/filter_qp/obs_filtered.csv";
     Utils::outputVelocityToFile(obs_filtered_filename, position, original_vel, obs_filtered_vels);
 
-    std::string st_filename = "../result/st_graph.csv";
+    std::string st_filename = "../result/filter_qp/st_graph.csv";
     Utils::outputSTToFile(st_filename, position, original_vel, obs_filtered_vels, obs);
 
     /***************************************************/
@@ -63,6 +63,7 @@ int main()
     std::vector<double> filtered_vel;
     std::vector<double> filtered_acc;
     vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, obs_filtered_vels, filtered_vel, filtered_acc);
+    //vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, filtered_vel, filtered_vel, filtered_acc);
 
     for(int i=0; i<original_vel.size(); ++i)
         std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
@@ -97,8 +98,8 @@ int main()
                   << "   qp_acceleration: " << std::setprecision(5) << qp_output.qp_acceleration[i]
                   << "   qp_jerk: " << std::setprecision(5) << qp_output.qp_jerk[i] << std::endl;
 
-    std::string qp_filename = "../result/qp_result.csv";
-    std::string velocity_filename = "../result/reference_velocity.csv";
+    std::string qp_filename = "../result/filter_qp/qp_result.csv";
+    std::string velocity_filename = "../result/filter_qp/reference_velocity.csv";
     //Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
     Utils::outputVelocityToFile(velocity_filename, position, obs_filtered_vels, filtered_vel, filtered_acc);
     Utils::outputResultToFile(qp_filename, position, qp_output.qp_velocity, qp_output.qp_acceleration, qp_output.qp_jerk);
