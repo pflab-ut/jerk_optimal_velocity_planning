@@ -87,7 +87,7 @@ int main()
 
     QPOptimizer::QPOutputInfo qp_output;
     //qp_optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, original_vel, filtered_acc, qp_output);
-    qp_optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, filtered_acc, qp_output);
+    qp_optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, qp_output);
 
     for(int i=0; i<original_vel.size(); ++i)
         std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]

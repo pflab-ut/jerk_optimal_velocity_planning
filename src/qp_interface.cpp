@@ -19,7 +19,6 @@ bool QPOptimizer::solve(const double &initial_vel,
                         const double &ds,
                         const std::vector<double> &ref_vels,
                         const std::vector<double> &max_vels,
-                        const std::vector<double> &ref_accs,
                         QPOutputInfo &qp_output)
 {
     assert(ref_vels.size()==max_vels.size());
