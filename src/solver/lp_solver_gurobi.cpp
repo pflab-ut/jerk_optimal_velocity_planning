@@ -27,9 +27,18 @@ namespace gurobi
 
             /*
              * x = [b[0], b[1], ..., b[N] | a[0], a[1], .... a[N] | delta[0], ..., delta[N]
-             *      | sigma[0], sigma[1], ...., sigma[N] | gamma[0], gamma[1], ..., gamma[N]
-             *      | abs_delta[0], abs_delta[1], ..., abs_delta[N] | abs_sigma[0], ..., abs_sigma[N]
-             *      | abs_gamma[0], abs_gamma[1], ..., abs_gamma[N] ]
+             *      | pdelta[0], pdelta[1], ..., pdelta[N]
+             *      | psigma[0], psigma[1], ..., psigma[N]
+             *      | pgamma[0], pgamma[1], ..., pgamma[N]
+             *      | mdelta[0], mdelta[1], ..., mdelta[N]
+             *      | msigma[0], msigma[1], ..., msigma[N]
+             *      | mgamma[0], mgamma[1], ..., mgamma[N]
+             *      delta[i] = pdelta[i] - mdelta[i]
+             *      sigma[i] = psigma[i] - msigma[i]
+             *      gamma[i] = pgamma[i] - mgamma[i]
+             *      |delta[i]| = pdelta[i] + mdelta[i]
+             *      |sigma[i]| = psigma[i] + msigma[i]
+             *      |gamma[i]| = pgamma[i] + mgamma[i]
              * b[i]: velocity^2
              * delta: 0 < b[i]-delta[i] < max_vel[i]*max_vel[i]
              * sigma: amin < a[i] - sigma[i] < amax
@@ -38,12 +47,12 @@ namespace gurobi
 
             std::vector<GRBVar> b(N);
             std::vector<GRBVar> a(N);
-            std::vector<GRBVar> pdelta(N);
-            std::vector<GRBVar> psigma(N);
-            std::vector<GRBVar> pgamma(N);
-            std::vector<GRBVar> mdelta(N);
-            std::vector<GRBVar> msigma(N);
-            std::vector<GRBVar> mgamma(N);
+            std::vector<GRBVar> pdelta(N); // positive delta
+            std::vector<GRBVar> psigma(N); // positive sigma
+            std::vector<GRBVar> pgamma(N); // positive gamma
+            std::vector<GRBVar> mdelta(N); // minus delta
+            std::vector<GRBVar> msigma(N); // minus sigma
+            std::vector<GRBVar> mgamma(N); // minus gamma
 
             for(int i=0; i<N; ++i)
             {
