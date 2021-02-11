@@ -3,7 +3,7 @@
 #include <iomanip>
 #include "interpolate.h"
 #include "filter.h"
-#include "qp_interface.h"
+#include "optimizer.h"
 #include "utils.h"
 #include "obstacle.h"
 
@@ -74,35 +74,35 @@ int main()
     /***************************************************/
     /*************** QP Optimization +******************/
     /***************************************************/
-    QPOptimizer::OptimizerParam param{};
+    BaseSolver::OptimizerParam param{};
     param.max_accel = 1.0;
     param.min_decel = -1.0;
     param.max_jerk = 0.8;
     param.min_jerk = -0.8;
-    param.smooth_weight = 100.0;
+    param.smooth_weight = 0.0;
     param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
-    QPOptimizer qp_optimizer(param);
+    Optimizer optimizer(Optimizer::OptimizerSolver::OSQP_QP, param);
 
-    QPOptimizer::QPOutputInfo qp_output;
+    BaseSolver::OutputInfo output;
     //qp_optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, original_vel, filtered_acc, qp_output);
-    qp_optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, qp_output);
+    optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
 
     for(int i=0; i<original_vel.size(); ++i)
         std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
                   << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
                   << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
-                  << "   qp_velocity: " << std::setprecision(5) << qp_output.qp_velocity[i]
+                  << "   qp_velocity: " << std::setprecision(5) << output.velocity[i]
                   << "   filtered_acceleration: " << std::setprecision(5) << filtered_acc[i]
-                  << "   qp_acceleration: " << std::setprecision(5) << qp_output.qp_acceleration[i]
-                  << "   qp_jerk: " << std::setprecision(5) << qp_output.qp_jerk[i] << std::endl;
+                  << "   qp_acceleration: " << std::setprecision(5) << output.acceleration[i]
+                  << "   qp_jerk: " << std::setprecision(5) << output.jerk[i] << std::endl;
 
     std::string qp_filename = "../result/filter_qp/qp_result.csv";
     std::string velocity_filename = "../result/filter_qp/reference_velocity.csv";
     //Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
     Utils::outputVelocityToFile(velocity_filename, position, obs_filtered_vels, filtered_vel, filtered_acc);
-    Utils::outputResultToFile(qp_filename, position, qp_output.qp_velocity, qp_output.qp_acceleration, qp_output.qp_jerk);
+    Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk);
 
     return 0;
 }

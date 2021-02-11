@@ -8,7 +8,7 @@ import platform
 import os
 
 if __name__ == '__main__':
-    os.chdir('../')
+    os.chdir('../../')
     path = os.getcwd()
     ref_vel_data = pd.read_csv(path+"/result/filter_qp/reference_velocity.csv")
     qp_data = pd.read_csv(path+"/result/filter_qp/qp_result.csv")

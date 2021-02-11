@@ -20,8 +20,8 @@
 #include <vector>
 
 #include "osqp.h"
-#include "solver_interface/csc_matrix_conv.h"
-#include "solver_interface/osqp_interface.h"
+#include "solver/solver_interface/csc_matrix_conv.h"
+#include "solver/solver_interface/osqp_interface.h"
 
 namespace osqp
 {

@@ -3,7 +3,7 @@
 #include <iomanip>
 #include "interpolate.h"
 #include "filter.h"
-#include "qp_interface.h"
+#include "optimizer.h"
 #include "utils.h"
 #include "obstacle.h"
 
@@ -37,20 +37,22 @@ int main()
     /***************************************************/
     /*************** QP Optimization +******************/
     /***************************************************/
-    QPOptimizer::OptimizerParam param{};
+    BaseSolver::OptimizerParam param{};
     param.max_accel = 1.0;
     param.min_decel = -1.0;
     param.max_jerk = 0.8;
     param.min_jerk = -0.8;
-    param.smooth_weight = 0.0;
+    param.smooth_weight = 100.0;
     param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
-    QPOptimizer qp_optimizer(param);
+    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
 
-    QPOptimizer::QPOutputInfo qp_output;
-    qp_optimizer.solve(initial_vel, initial_acc, ds, original_vel, qp_output);
+    BaseSolver::OutputInfo output;
+    optimizer.solve(initial_vel, initial_acc, ds, original_vel, output);
 
     std::string qp_filename = "../result/pseudo_jerk/qp_result.csv";
-    Utils::outputResultToFile(qp_filename, position, qp_output.qp_velocity, qp_output.qp_acceleration, qp_output.qp_jerk, original_vel);
+    Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk, original_vel);
+
+    return 0;
 }
