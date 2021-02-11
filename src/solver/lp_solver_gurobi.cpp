@@ -99,12 +99,12 @@ namespace gurobi
                 model.addConstr((a[i+1] - a[i])*ref_vels[i] - gamma[i]*ds <= jmax*ds, "juconstraint"+std::to_string(i));
 
                 // b' = 2a ... (b(i+1) - b(i)) / ds = 2a(i)
-                model.addConstr((b[i+1]-b[i])/ds == 2*a[i], "equality"+std::to_string(i));
+                model.addConstr((b[i+1]-b[i]) == 2*a[i]*ds, "equality"+std::to_string(i));
             }
 
             // Initial Condition
             model.addConstr(b[0]==initial_vel*initial_vel, "v0");
-            model.addConstr(a[0]==initial_acc*initial_acc, "a0");
+            model.addConstr(a[0]==initial_acc, "a0");
 
             // Absolute Value Constraint
             for(int i=0; i<N; ++i)

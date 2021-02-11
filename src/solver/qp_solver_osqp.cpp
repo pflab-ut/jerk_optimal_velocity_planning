@@ -179,16 +179,6 @@ namespace osqp
         }
         output.jerk[N-1] = output.jerk[N-2];
 
-        // jerk_min/ref_vel[i] < pseudo_jerk[i] - gamma[i] < jerk_max/ref_vel[i] を確認したい
-        for (size_t i = 0; i < ref_vels.size() - 1; ++i) {
-            double ai = output.acceleration[i];
-            double ai_next = output.acceleration[i + 1];
-            double p_jerk = (ai_next - ai) / ds;
-            double gamma = optval.at(4*N + i);
-            double refvel_i = std::max(ref_vels[i], 1.0);
-            printf("i = %lu, [%.3f / %.3f = %.3f] < [%.3f - %.3f = %.3f] < [%.3f / %.3f = %.3f]\n", i, jmin, refvel_i, jmin/refvel_i, p_jerk, gamma, p_jerk - gamma, jmax, refvel_i, jmax/refvel_i);
-        }
-
         const int status_val = std::get<3>(result);
         if(status_val != 1)
         {

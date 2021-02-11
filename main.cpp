@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <chrono>
 #include "interpolate.h"
 #include "filter.h"
 #include "optimizer.h"
@@ -79,15 +80,23 @@ int main()
     param.min_decel = -1.0;
     param.max_jerk = 0.8;
     param.min_jerk = -0.8;
-    param.smooth_weight = 0.0;
     param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
-    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
+
+    std::chrono::system_clock::time_point  start, end;
+    start = std::chrono::system_clock::now();
+
+    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_LP, param);
+
+    end = std::chrono::system_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
+    std::cout << "Calulation Time: " << elapsed << "[ns]" << std::endl;
 
     BaseSolver::OutputInfo output;
     optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
 
+    /*
     for(int i=0; i<original_vel.size(); ++i)
         std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
                   << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
@@ -96,6 +105,7 @@ int main()
                   << "   filtered_acceleration: " << std::setprecision(5) << filtered_acc[i]
                   << "   qp_acceleration: " << std::setprecision(5) << output.acceleration[i]
                   << "   qp_jerk: " << std::setprecision(5) << output.jerk[i] << std::endl;
+                  */
 
     std::string qp_filename = "../result/filter_qp/qp_result.csv";
     std::string velocity_filename = "../result/filter_qp/reference_velocity.csv";
