@@ -84,17 +84,17 @@ int main()
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
 
+    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_LP, param);
+    BaseSolver::OutputInfo output;
+
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
 
-    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_LP, param);
+    optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
 
     end = std::chrono::system_clock::now();
-    double elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
-    std::cout << "Calulation Time: " << elapsed << "[ns]" << std::endl;
-
-    BaseSolver::OutputInfo output;
-    optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
+    double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::cout << "Calulation Time: " << elapsed << "[ms]" << std::endl;
 
     /*
     for(int i=0; i<original_vel.size(); ++i)

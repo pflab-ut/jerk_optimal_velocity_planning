@@ -20,6 +20,7 @@ namespace gurobi
             model.set(GRB_DoubleParam_BarConvTol, 1e-4);
             model.set(GRB_DoubleParam_OptimalityTol, 1e-4);
             model.set(GRB_IntParam_OutputFlag, 0);
+            //model.set(GRB_IntParam_Method, 2);
 
             assert(ref_vels.size()==max_vels.size());
             int N = ref_vels.size();
