@@ -2,6 +2,7 @@
 #define FILTER_POSITION_OPTIMIZATION_OPTIMIZER_H
 
 #include "solver/base_solver.h"
+#include "solver/lp_solver_gurobi.h"
 #include "solver/qp_solver_gurobi.h"
 #include "solver/qp_solver_osqp.h"
 #include <memory>

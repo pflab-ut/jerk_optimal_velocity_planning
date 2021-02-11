@@ -4,6 +4,8 @@ Optimizer::Optimizer(const OptimizerSolver& solver_num, const BaseSolver::Optimi
 {
     if(solver_num == GUROBI_QP)
         solver_ = std::make_shared<gurobi::QPSolver>(param);
+    else if(solver_num == GUROBI_LP)
+        solver_ = std::make_shared<gurobi::LPSolver>(param);
     else if(solver_num == OSQP_QP)
         solver_ = std::make_shared<osqp::QPSolver>(param);
 }

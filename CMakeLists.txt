@@ -26,13 +26,14 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 find_package(osqp REQUIRED)
 
 add_library(FILTER_LIB src/interpolate.cpp
-        src/solver/solver_interface/osqp_interface.cpp
-        src/solver/solver_interface/csc_matrix_conv.cpp
+                       src/solver/solver_interface/osqp_interface.cpp
+                       src/solver/solver_interface/csc_matrix_conv.cpp
+                       src/solver/qp_solver_gurobi.cpp
+                       src/solver/lp_solver_gurobi.cpp
+                       src/solver/qp_solver_osqp.cpp
                        src/filter.cpp
                        src/utils.cpp
-        src/optimizer.cpp
-                       src/solver/qp_solver_gurobi.cpp
-                       src/solver/qp_solver_osqp.cpp)
+                       src/optimizer.cpp)
 target_link_libraries(FILTER_LIB osqp::osqp)
 target_link_libraries(FILTER_LIB gurobi_c++)
 target_link_libraries(FILTER_LIB gurobi90)

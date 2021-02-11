@@ -83,10 +83,9 @@ int main()
     param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
-    Optimizer optimizer(Optimizer::OptimizerSolver::OSQP_QP, param);
+    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
 
     BaseSolver::OutputInfo output;
-    //qp_optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, original_vel, filtered_acc, qp_output);
     optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
 
     for(int i=0; i<original_vel.size(); ++i)
