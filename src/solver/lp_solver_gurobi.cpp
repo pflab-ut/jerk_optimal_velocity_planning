@@ -38,23 +38,23 @@ namespace gurobi
 
             std::vector<GRBVar> b(N);
             std::vector<GRBVar> a(N);
-            std::vector<GRBVar> delta(N);
-            std::vector<GRBVar> sigma(N);
-            std::vector<GRBVar> gamma(N);
-            std::vector<GRBVar> abs_delta(N);
-            std::vector<GRBVar> abs_sigma(N);
-            std::vector<GRBVar> abs_gamma(N);
+            std::vector<GRBVar> pdelta(N);
+            std::vector<GRBVar> psigma(N);
+            std::vector<GRBVar> pgamma(N);
+            std::vector<GRBVar> mdelta(N);
+            std::vector<GRBVar> msigma(N);
+            std::vector<GRBVar> mgamma(N);
 
             for(int i=0; i<N; ++i)
             {
                 b[i] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "b"+std::to_string(i));
                 a[i] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "a"+std::to_string(i));
-                delta[i] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "delta"+std::to_string(i));
-                sigma[i] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "sigma"+std::to_string(i));
-                gamma[i] = model.addVar(-GRB_INFINITY, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "gamma"+std::to_string(i));
-                abs_delta[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "abs_delta"+std::to_string(i));
-                abs_sigma[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "abs_sigma"+std::to_string(i));
-                abs_gamma[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "abs_gamma"+std::to_string(i));
+                pdelta[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "positive_delta"+std::to_string(i));
+                psigma[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "positive_sigma"+std::to_string(i));
+                pgamma[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "positive_gamma"+std::to_string(i));
+                mdelta[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "minus_delta"+std::to_string(i));
+                msigma[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "minus_sigma"+std::to_string(i));
+                mgamma[i] = model.addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "minus_gamma"+std::to_string(i));
             }
 
             const double amax = param_.max_accel;
@@ -72,7 +72,9 @@ namespace gurobi
             /**************************************************************/
             GRBLinExpr  Jl = 0.0;
             for(int i=0; i<N; ++i)
-                Jl += -b[i] + over_v_weight*abs_delta[i] + over_a_weight*abs_sigma[i] + over_j_weight*abs_gamma[i];
+                Jl += -b[i] + over_v_weight*(pdelta[i]+mdelta[i])
+                            + over_a_weight*(psigma[i]+msigma[i])
+                            + over_j_weight*(pgamma[i]+mgamma[i]);
 
             model.setObjective(Jl, GRB_MINIMIZE);
 
@@ -84,20 +86,20 @@ namespace gurobi
             for(int i=0; i<N; ++i)
             {
                 // 0 < b - delta < vmax^2
-                model.addConstr(0 <= b[i]-delta[i], "blconstraint"+std::to_string(i));
-                model.addConstr(b[i]-delta[i] <= max_vels[i]*max_vels[i], "buconstraint"+std::to_string(i));
+                model.addConstr(0 <= b[i]-(pdelta[i]-mdelta[i]), "blconstraint"+std::to_string(i));
+                model.addConstr(b[i]-(pdelta[i]-mdelta[i]) <= max_vels[i]*max_vels[i], "buconstraint"+std::to_string(i));
 
                 // amin < a - sigma < amax
-                model.addConstr(amin <= a[i] - sigma[i], "alconstraint" + std::to_string(i));
-                model.addConstr(a[i] - sigma[i] <= amax, "auconstraint" + std::to_string(i));
+                model.addConstr(amin <= a[i] - (psigma[i]-msigma[i]), "alconstraint" + std::to_string(i));
+                model.addConstr(a[i] - (psigma[i]-msigma[i]) <= amax, "auconstraint" + std::to_string(i));
             }
 
             for(int i=0; i<N-1; ++i)
             {
                 // Soft Constraint Jerk Limit: jerk_min < pseudo_jerk[i] * ref_vel[i] - gamma[i] < jerk_max
                 // -> jerk_min * ds < (a[i+1] - a[i]) * ref_vel[i] - gamma[i] * ds < jerk_max * ds
-                model.addConstr(jmin * ds <= (a[i+1] - a[i])*ref_vels[i] - gamma[i]*ds, "jlconstraint"+std::to_string(i));
-                model.addConstr((a[i+1] - a[i])*ref_vels[i] - gamma[i]*ds <= jmax*ds, "juconstraint"+std::to_string(i));
+                model.addConstr(jmin * ds <= (a[i+1] - a[i])*ref_vels[i] - (pgamma[i]-mgamma[i])*ds, "jlconstraint"+std::to_string(i));
+                model.addConstr((a[i+1] - a[i])*ref_vels[i] - (pgamma[i]-mgamma[i])*ds <= jmax*ds, "juconstraint"+std::to_string(i));
 
                 // b' = 2a ... (b(i+1) - b(i)) / ds = 2a(i)
                 model.addConstr((b[i+1]-b[i]) == 2*a[i]*ds, "equality"+std::to_string(i));
@@ -106,19 +108,6 @@ namespace gurobi
             // Initial Condition
             model.addConstr(b[0]==initial_vel*initial_vel, "v0");
             model.addConstr(a[0]==initial_acc, "a0");
-
-            // Absolute Value Constraint
-            for(int i=0; i<N; ++i)
-            {
-                // abs_delta[i] = |delta[i]|
-                model.addGenConstrAbs(abs_delta[i], delta[i]);
-
-                // abs_sigma[i] = |sigma[i]|
-                model.addGenConstrAbs(abs_sigma[i], sigma[i]);
-
-                // abs_gamma[i] = |gamma[i]|
-                model.addGenConstrAbs(abs_gamma[i], gamma[i]);
-            }
 
             /**************************************************************/
             /**************************************************************/
@@ -142,6 +131,7 @@ namespace gurobi
             }
             output.jerk[N-1] = output.jerk[N-2];
 
+            std::cout << "LP Runtime: " << model.get(GRB_DoubleAttr_Runtime)*1e3 << "[ms]" << std::endl;
         }
         catch(GRBException& e)
         {

@@ -123,6 +123,8 @@ namespace gurobi
                 output.jerk[i] = (a_next - a_current) * output.velocity[i] / ds;
             }
             output.jerk[N-1] = output.jerk[N-2];
+
+            std::cout << "QP Runtime: " << model.get(GRB_DoubleAttr_Runtime)*1e3 << "[ms]" << std::endl;
         }
         catch(GRBException& e)
         {
