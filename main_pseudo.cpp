@@ -35,6 +35,29 @@ int main()
     original_vel.back() = 0.0;
 
     /***************************************************/
+    /******************* Obstacle **********************/
+    /***************************************************/
+    const int obs_size = 50;
+    const double obs_v = 2.0;
+    const double dt = 0.1;
+    const double s0 = 10.0;
+    const double t0 = 2.0;
+    Obstacle obs(obs_size, obs_v, dt, s0, t0);
+
+    /***************************************************/
+    /********** Obstacle Filter Velocity ***************/
+    /***************************************************/
+    Filter vel_filter;
+    std::vector<double> obs_filtered_vels;
+    vel_filter.obstacleVelocityLimitFilter(initial_vel, position, original_vel, obs, obs_filtered_vels);
+
+    std::string obs_filtered_filename = "../result/pseudo_jerk/obs_filtered.csv";
+    Utils::outputVelocityToFile(obs_filtered_filename, position, original_vel, obs_filtered_vels);
+
+    std::string st_filename = "../result/pseudo_jerk/st_graph.csv";
+    Utils::outputSTToFile(st_filename, position, original_vel, obs_filtered_vels, obs);
+
+    /***************************************************/
     /*************** QP Optimization +******************/
     /***************************************************/
     BaseSolver::OptimizerParam param{};
@@ -49,10 +72,10 @@ int main()
     Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
 
     BaseSolver::OutputInfo output;
-    optimizer.solve(initial_vel, initial_acc, ds, original_vel, output);
+    optimizer.solve(initial_vel, initial_acc, ds, obs_filtered_vels, output);
 
     std::string qp_filename = "../result/pseudo_jerk/qp_result.csv";
-    Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk, original_vel);
+    Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk, obs_filtered_vels);
 
     return 0;
 }
