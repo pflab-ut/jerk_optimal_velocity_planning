@@ -2,12 +2,12 @@
 
 namespace gurobi
 {
-    bool QPSolver::solve(const double& initial_vel,
-                         const double& initial_acc,
-                         const double& ds,
-                         const std::vector<double>& ref_vels,
-                         const std::vector<double>& max_vels,
-                         OutputInfo& output)
+    bool QPSolver::solveSoft(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output)
     {
         try
         {
@@ -140,11 +140,23 @@ namespace gurobi
         return true;
     }
 
-    bool QPSolver::solve(const double& initial_vel,
-                         const double& initial_acc,
-                         const double& ds,
-                         const std::vector<double>& max_vels,
-                         OutputInfo& output)
+    bool QPSolver::solveHard(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output)
+    {
+        std::cerr << "This has the same form of the LPSolver::SolveHard" << std::endl;
+        return false;
+    }
+
+    bool QPSolver::solveSoftPseudo(const double& initial_vel,
+                                   const double& initial_acc,
+                                   const double& ds,
+                                   const std::vector<double>& ref_vels,
+                                   const std::vector<double>& max_vels,
+                                   OutputInfo& output)
     {
         try
         {
@@ -225,6 +237,106 @@ namespace gurobi
             // Initial Condition
             model.addConstr(b[0]==initial_vel*initial_vel, "v0");
             model.addConstr(a[0]==initial_acc, "a0");
+
+            /**************************************************************/
+            /**************************************************************/
+            /********************** Optimize ******************************/
+            /**************************************************************/
+            /**************************************************************/
+            model.optimize();
+
+            output.resize(N);
+            for(unsigned int i=0; i<N; ++i)
+            {
+                output.velocity[i] = std::sqrt(std::max(b[i].get(GRB_DoubleAttr_X), 0.0));
+                output.acceleration[i] = a[i].get(GRB_DoubleAttr_X);
+            }
+
+            for(unsigned int i=0; i<N-1; ++i)
+            {
+                double a_current = output.acceleration[i];
+                double a_next    = output.acceleration[i+1];
+                output.jerk[i] = (a_next - a_current) * output.velocity[i] / ds;
+            }
+            output.jerk[N-1] = output.jerk[N-2];
+            std::cout << "QP Runtime: " << model.get(GRB_DoubleAttr_Runtime)*1e3 << "[ms]" << std::endl;
+        }
+        catch(GRBException& e)
+        {
+            std::cout << "Error code = " << e.getErrorCode() << std::endl;
+            std::cout << e.getMessage() << std::endl;
+            return false;
+        }
+        catch(...)
+        {
+            std::cout << "Exception during optimization" << std::endl;
+            return false;
+        }
+
+        return true;
+    }
+
+    bool QPSolver::solveHardPseudo(const double& initial_vel,
+                                   const double& initial_acc,
+                                   const double& ds,
+                                   const std::vector<double>& ref_vels,
+                                   const std::vector<double>& max_vels,
+                                   OutputInfo& output)
+    {
+        try
+        {
+            /* Create Environment */
+            GRBEnv env = GRBEnv();
+            GRBModel model = GRBModel(env);
+
+            int N = max_vels.size();
+            const double amax = param_.max_accel;
+            const double amin = param_.min_decel;
+            const double smooth_weight = param_.smooth_weight;
+
+            /*
+             * x = [b0, b1, ..., bN, |  a0, a1, ..., aN, | delta0, delta1, ..., deltaN] in R^{3N}
+             * b: velocity^2
+             * a: acceleration
+             * sigma: amin < ai < amax
+             */
+            std::vector<GRBVar> b(N);
+            std::vector<GRBVar> a(N);
+            b[0] = model.addVar(initial_vel*initial_vel, initial_vel*initial_vel, 0.0, GRB_CONTINUOUS, "b0");
+            a[0] = model.addVar(initial_acc, initial_acc, 0.0, GRB_CONTINUOUS, "a0");
+            for(int i=1; i<N; ++i)
+            {
+                b[i] = model.addVar(0.0, max_vels[i]*max_vels[i], 0.0, GRB_CONTINUOUS, "b"+std::to_string(i));
+                a[i] = model.addVar(amin, amax, 0.0, GRB_CONTINUOUS, "a"+std::to_string(i));
+            }
+
+            /**************************************************************/
+            /**************************************************************/
+            /**************** design objective function *******************/
+            /**************************************************************/
+            /**************************************************************/
+            GRBLinExpr  Jl = 0.0;
+            GRBQuadExpr Jq = 0.0;
+            for(int i=0; i<N; ++i)
+            {
+                // |vmax^2 - b| -> minimize (-bi)
+                Jl += -b[i];
+
+                // pseudo jerk: d(ai)/ds -> minimize weight * (a1 - a0)^2
+                if(i<N-1)
+                    Jq += (smooth_weight/ds)*(a[i+1]-a[i])*(a[i+1]-a[i]);
+            }
+
+            model.setObjective(Jl + Jq, GRB_MINIMIZE);
+
+            /**************************************************************/
+            /**************************************************************/
+            /**************** design constraint matrix ********************/
+            /**************************************************************/
+            /**************************************************************/
+            for(int i=0; i<N-1; ++i)
+                // b' = 2a ... (b(i+1) - b(i)) / ds = 2a(i)
+                model.addConstr((b[i+1]-b[i])/ds == 2*a[i], "equality"+std::to_string(i));
 
             /**************************************************************/
             /**************************************************************/

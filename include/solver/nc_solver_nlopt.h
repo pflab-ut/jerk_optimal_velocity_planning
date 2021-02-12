@@ -50,18 +50,35 @@ namespace nlopt
     public:
         NCSolver(const OptimizerParam& param) : BaseSolver(param) {}
 
-        bool solve(const double& initial_vel,
-                   const double& initial_acc,
-                   const double& ds,
-                   const std::vector<double>& ref_vels,
-                   const std::vector<double>& max_vels,
-                   OutputInfo& output);
+        bool solveSoft(const double& initial_vel,
+                       const double& initial_acc,
+                       const double& ds,
+                       const std::vector<double>& ref_vels,
+                       const std::vector<double>& max_vels,
+                       OutputInfo& output);
 
-        bool solve(const double& initial_vel,
-                   const double& initial_acc,
-                   const double& ds,
-                   const std::vector<double>& max_vels,
-                   OutputInfo& output);
+        bool solveHard(const double& initial_vel,
+                       const double& initial_acc,
+                       const double& ds,
+                       const std::vector<double>& ref_vels,
+                       const std::vector<double>& max_vels,
+                       OutputInfo& output);
+
+        bool solveSoftPseudo(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output);
+
+        bool solveHardPseudo(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output);
+
+
 
     private:
         static double computeObjective(const std::vector<double>& x,

@@ -2,12 +2,12 @@
 
 namespace nlopt
 {
-    bool NCSolver::solve(const double& initial_vel,
-                         const double& initial_acc,
-                         const double& ds,
-                         const std::vector<double>& ref_vels,
-                         const std::vector<double>& max_vels,
-                         OutputInfo& output)
+    bool NCSolver::solveSoft(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output)
     {
         /*
          * x = [b[0], b[1], ..., b[N] | a[0], a[1], .... a[N] | delta[0], ..., delta[N]
@@ -139,13 +139,14 @@ namespace nlopt
         return true;
     }
 
-    bool NCSolver::solve(const double& initial_vel,
-                         const double& initial_acc,
-                         const double& ds,
-                         const std::vector<double>& max_vels,
-                         OutputInfo& output)
+    bool NCSolver::solveHard(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output)
     {
-/*
+        /*
          * x = [b[0], b[1], ..., b[N] | a[0], a[1], .... a[N] ]
          * b[i]: velocity^2
          * delta: 0 < b[i] < max_vel[i]*max_vel[i]
@@ -256,6 +257,27 @@ namespace nlopt
         }
 
         return true;
+    }
+
+    bool NCSolver::solveSoftPseudo(const double& initial_vel,
+                                   const double& initial_acc,
+                                   const double& ds,
+                                   const std::vector<double>& ref_vels,
+                                   const std::vector<double>& max_vels,
+                                   OutputInfo& output)
+    {
+        std::cerr << "[Solver Error]: Non-Convex solver cannot be applied to the pseudo-jerk problem" << std::endl;
+        return false;
+    }
+
+    bool NCSolver::solveHardPseudo(const double& initial_vel,
+                                   const double& initial_acc,
+                                   const double& ds,
+                                   const std::vector<double>& ref_vels,
+                                   const std::vector<double>& max_vels,
+                                   OutputInfo& output)
+    {
+        return solveSoftPseudo(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
     }
 
     double NCSolver::computeObjective(const std::vector<double>& x,

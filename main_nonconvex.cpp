@@ -79,12 +79,12 @@ int main()
 
     Optimizer optimizer(Optimizer::OptimizerSolver::NLOPT_NC, param);
     BaseSolver::OutputInfo output;
+    bool is_hard = true;
 
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
 
-    //bool result = optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
-    bool result = optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, output);
+    bool result = optimizer.solve(is_hard, initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
 
     end = std::chrono::system_clock::now();
     double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();

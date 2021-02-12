@@ -2,12 +2,12 @@
 
 namespace gurobi
 {
-    bool LPSolver::solve(const double& initial_vel,
-                         const double& initial_acc,
-                         const double& ds,
-                         const std::vector<double>& ref_vels,
-                         const std::vector<double>& max_vels,
-                         OutputInfo& output)
+    bool LPSolver::solveSoft(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output)
     {
         try
         {
@@ -20,7 +20,6 @@ namespace gurobi
             model.set(GRB_DoubleParam_BarConvTol, 1e-4);
             model.set(GRB_DoubleParam_OptimalityTol, 1e-4);
             model.set(GRB_IntParam_OutputFlag, 0);
-            //model.set(GRB_IntParam_Method, 2);
 
             assert(ref_vels.size()==max_vels.size());
             int N = ref_vels.size();
@@ -157,12 +156,134 @@ namespace gurobi
         return true;
     }
 
-    bool LPSolver::solve(const double& initial_vel,
-                         const double& initial_acc,
-                         const double& ds,
-                         const std::vector<double>& max_vels,
-                         OutputInfo& output)
+    bool LPSolver::solveHard(const double& initial_vel,
+                             const double& initial_acc,
+                             const double& ds,
+                             const std::vector<double>& ref_vels,
+                             const std::vector<double>& max_vels,
+                             OutputInfo& output)
     {
+        try
+        {
+            /* Create Environment */
+            GRBEnv env = GRBEnv();
+            GRBModel model = GRBModel(env);
+            model.set(GRB_DoubleParam_TimeLimit, 100.0);
+            model.set(GRB_DoubleParam_IterationLimit, 40000);
+            model.set(GRB_DoubleParam_FeasibilityTol, 1e-4);
+            model.set(GRB_DoubleParam_BarConvTol, 1e-4);
+            model.set(GRB_DoubleParam_OptimalityTol, 1e-4);
+            model.set(GRB_IntParam_OutputFlag, 0);
+
+            assert(ref_vels.size()==max_vels.size());
+            int N = ref_vels.size();
+            const double amax = param_.max_accel;
+            const double amin = param_.min_decel;
+            const double jmax = param_.max_jerk;
+            const double jmin = param_.min_jerk;
+
+            /*
+             * x = [b[0], b[1], ..., b[N] | a[0], a[1], .... a[N]]
+             * b[i]: velocity^2
+             * delta: 0 < b[i] < max_vel[i]*max_vel[i]
+             * sigma: amin < a[i] < amax
+             * gamma: jerk_min/ref_vel[i] < pseudo_jerk[i] < jerk_max/ref_vel[i]
+             */
+            std::vector<GRBVar> b(N);
+            std::vector<GRBVar> a(N);
+            b[0] = model.addVar(initial_vel*initial_vel, initial_vel*initial_vel, 0.0, GRB_CONTINUOUS, "b0");
+            a[0] = model.addVar(initial_acc, initial_acc, 0.0, GRB_CONTINUOUS, "a0");
+            for(int i=1; i<N; ++i)
+            {
+                b[i] = model.addVar(0.0, max_vels[i]*max_vels[i], 0.0, GRB_CONTINUOUS, "b"+std::to_string(i));
+                a[i] = model.addVar(amin, amax, 0.0, GRB_CONTINUOUS, "a"+std::to_string(i));
+            }
+
+            /**************************************************************/
+            /**************************************************************/
+            /**************** design objective function *******************/
+            /**************************************************************/
+            /**************************************************************/
+            GRBLinExpr  Jl = 0.0;
+            for(int i=0; i<N; ++i)
+                Jl += -b[i];
+
+            model.setObjective(Jl, GRB_MINIMIZE);
+
+            /**************************************************************/
+            /**************************************************************/
+            /**************** design constraint matrix ********************/
+            /**************************************************************/
+            /**************************************************************/
+            for(int i=0; i<N-1; ++i)
+            {
+                // Soft Constraint Jerk Limit: jerk_min < pseudo_jerk[i] * ref_vel[i] < jerk_max
+                // -> jerk_min * ds < (a[i+1] - a[i]) * ref_vel[i] < jerk_max * ds
+                model.addConstr(jmin * ds <= (a[i+1] - a[i])*ref_vels[i], "jlconstraint"+std::to_string(i));
+                model.addConstr((a[i+1] - a[i])*ref_vels[i] <= jmax * ds, "juconstraint"+std::to_string(i));
+
+                // b' = 2a ... (b(i+1) - b(i)) / ds = 2a(i)
+                model.addConstr((b[i+1]-b[i]) == 2*a[i]*ds, "equality"+std::to_string(i));
+            }
+
+            /**************************************************************/
+            /**************************************************************/
+            /********************** Optimize ******************************/
+            /**************************************************************/
+            /**************************************************************/
+            model.optimize();
+
+            output.resize(N);
+            for(unsigned int i=0; i<N; ++i)
+            {
+                output.velocity[i] = std::sqrt(std::max(b[i].get(GRB_DoubleAttr_X), 0.0));
+                output.acceleration[i] = a[i].get(GRB_DoubleAttr_X);
+            }
+
+            for(unsigned int i=0; i<N-1; ++i)
+            {
+                double a_current = output.acceleration[i];
+                double a_next    = output.acceleration[i+1];
+                output.jerk[i] = (a_next - a_current) * output.velocity[i] / ds;
+            }
+            output.jerk[N-1] = output.jerk[N-2];
+
+            std::cout << "LP Runtime: " << model.get(GRB_DoubleAttr_Runtime)*1e3 << "[ms]" << std::endl;
+        }
+        catch(GRBException& e)
+        {
+            std::cout << "Error code = " << e.getErrorCode() << std::endl;
+            std::cout << e.getMessage() << std::endl;
+            return false;
+        }
+        catch(...)
+        {
+            std::cout << "Exception during optimization" << std::endl;
+            return false;
+        }
+
         return true;
+    }
+
+    bool LPSolver::solveSoftPseudo(const double &initial_vel,
+                                   const double &initial_acc,
+                                   const double &ds,
+                                   const std::vector<double> &ref_vels,
+                                   const std::vector<double> &max_vels,
+                                   OutputInfo &output)
+    {
+        std::cerr << "[Solver Error]: LP Solver cannot be applied to the pseudo-jerk problem" << std::endl;
+        return false;
+    }
+
+    bool LPSolver::solveHardPseudo(const double &initial_vel,
+                                   const double &initial_acc,
+                                   const double &ds,
+                                   const std::vector<double> &ref_vels,
+                                   const std::vector<double> &max_vels,
+                                   OutputInfo &output)
+
+    {
+        return solveSoftPseudo(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
     }
 }

@@ -57,18 +57,33 @@ public:
         param_ = param;
     }
 
-    virtual bool solve(const double& initial_vel,
-                       const double& initial_acc,
-                       const double& ds,
-                       const std::vector<double>& ref_vels,
-                       const std::vector<double>& max_vels,
-                       OutputInfo& output) = 0;
+    virtual bool solveSoft(const double& initial_vel,
+                           const double& initial_acc,
+                           const double& ds,
+                           const std::vector<double>& ref_vels,
+                           const std::vector<double>& max_vels,
+                           OutputInfo& output) = 0;
 
-    virtual bool solve(const double& initial_vel,
-                       const double& initial_acc,
-                       const double& ds,
-                       const std::vector<double>& max_vels,
-                       OutputInfo& output) = 0;
+    virtual bool solveHard(const double& initial_vel,
+                           const double& initial_acc,
+                           const double& ds,
+                           const std::vector<double>& ref_vels,
+                           const std::vector<double>& max_vels,
+                           OutputInfo& output) = 0;
+
+    virtual bool solveSoftPseudo(const double& initial_vel,
+                                 const double& initial_acc,
+                                 const double& ds,
+                                 const std::vector<double>& ref_vels,
+                                 const std::vector<double>& max_vels,
+                                 OutputInfo& output) = 0;
+
+    virtual bool solveHardPseudo(const double& initial_vel,
+                                 const double& initial_acc,
+                                 const double& ds,
+                                 const std::vector<double>& ref_vels,
+                                 const std::vector<double>& max_vels,
+                                 OutputInfo& output) = 0;
 
 protected:
     OptimizerParam param_;

@@ -70,12 +70,18 @@ int main()
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
     Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
-
     BaseSolver::OutputInfo output;
-    optimizer.solve(initial_vel, initial_acc, ds, obs_filtered_vels, output);
+    bool is_hard = false;
 
-    std::string qp_filename = "../result/pseudo_jerk/qp_result.csv";
-    Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk, obs_filtered_vels);
+    bool result = optimizer.solvePseudo(is_hard, initial_vel, initial_acc, ds, obs_filtered_vels, obs_filtered_vels, output);
+
+    if(result)
+    {
+        std::string qp_filename = "../result/pseudo_jerk/qp_result.csv";
+        Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk, obs_filtered_vels);
+    }
+    else
+        std::cerr << "[Solver Error]: Solver has some error" << std::endl;
 
     return 0;
 }

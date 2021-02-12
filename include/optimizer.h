@@ -19,18 +19,21 @@ public:
 
     Optimizer(const OptimizerSolver& solver_num, const BaseSolver::OptimizerParam& param);
 
-    bool solve(const double& initial_vel,
+    bool solve(const bool& is_hard,
+               const double& initial_vel,
                const double& initial_acc,
                const double& ds,
                const std::vector<double>& ref_vels,
                const std::vector<double>& max_vels,
                BaseSolver::OutputInfo& output);
 
-    bool solve(const double& initial_vel,
-               const double& initial_acc,
-               const double& ds,
-               const std::vector<double>& max_vels,
-               BaseSolver::OutputInfo& output);
+    bool solvePseudo(const bool& is_hard,
+                     const double& initial_vel,
+                     const double& initial_acc,
+                     const double& ds,
+                     const std::vector<double>& ref_vels,
+                     const std::vector<double>& max_vels,
+                     BaseSolver::OutputInfo& output);
 
 private:
     std::shared_ptr<BaseSolver> solver_;
