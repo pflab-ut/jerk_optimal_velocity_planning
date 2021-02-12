@@ -7,6 +7,7 @@
 #include <cassert>
 #include <iostream>
 #include <chrono>
+#include "nlopt.hpp"
 #include "solver_interface/osqp_interface.h"
 #include "interpolate.h"
 #include "osqp.h"
