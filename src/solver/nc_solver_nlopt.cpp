@@ -15,14 +15,14 @@ namespace nlopt
          * b[i]: velocity^2
          * delta: 0 < b[i]-delta[i] < max_vel[i]*max_vel[i]
          * sigma: amin < a[i] - sigma[i] < amax
-         * gamma: jerk_min/ref_vel[i] < pseudo_jerk[i] - gamma[i] < jerk_max/ref_vel[i]
+         * gamma: jerk_min < jerk[i]  < jerk_max
          */
 
         double tol = 1e-5;
 
         assert(ref_vels.size()==max_vels.size());
         int N = ref_vels.size();
-        int dim = 5*N;
+        int dim = 2*N;
         const double amax = param_.max_accel;
         const double amin = param_.min_decel;
         const double jmax = param_.max_jerk;
@@ -86,7 +86,7 @@ namespace nlopt
         std::vector<double> ac_tols(2*N, tol);
         opt.add_inequality_mconstraint(computeAccConstraint, &ac_param, ac_tols);
 
-        // 6. Add Acceleration Constraint
+        // 6. Add Jerk Constraint
         JerkConstParameter jc_param;
         jc_param.N_  = N;
         jc_param.ds_ = ds;
@@ -105,9 +105,7 @@ namespace nlopt
         x[N] = initial_acc;
 
         for(int i=2; i<N; ++i)
-        {
             x[i] = max_vels[i] * max_vels[i];
-        }
 
         // Solve the problem
         double min_f;
@@ -147,6 +145,115 @@ namespace nlopt
                          const std::vector<double>& max_vels,
                          OutputInfo& output)
     {
+/*
+         * x = [b[0], b[1], ..., b[N] | a[0], a[1], .... a[N] ]
+         * b[i]: velocity^2
+         * delta: 0 < b[i] < max_vel[i]*max_vel[i]
+         * sigma: amin < a[i] < amax
+         * gamma: jerk_min < jerk[i]  < jerk_max
+         */
+
+        double tol = 1e-5;
+
+        assert(max_vels.size()==max_vels.size());
+        int N = max_vels.size();
+        int dim = 2*N;
+        const double amax = param_.max_accel;
+        const double amin = param_.min_decel;
+        const double jmax = param_.max_jerk;
+        const double jmin = param_.min_jerk;
+
+        nlopt::opt opt(nlopt::LD_SLSQP, dim); //algorithm and dimension of the problem
+        opt.set_maxeval(400000);
+
+        //  1. Create Input Constraint
+        std::vector<double> lb(dim); // Lower Bound
+        std::vector<double> ub(dim); // Upper Bound
+        for(int i=0; i<N; ++i)
+        {
+            lb[i] = 0.0;
+            ub[i] = max_vels[i]*max_vels[i];
+        }
+
+        for(int i=N; i<2*N; ++i)
+        {
+            lb[i] = amin;
+            ub[i] = amax;
+        }
+
+        // initial value
+        lb[0] = initial_vel*initial_vel;
+        ub[0] = initial_vel*initial_vel;
+        lb[N] = initial_acc;
+        ub[N] = initial_acc;
+
+        opt.set_lower_bounds(lb);
+        opt.set_upper_bounds(ub);
+
+        // 2. Set Objective Function
+        ObjectiveParameter param;
+        param.dim_b_ = N;
+        param.dim_a_ = N;
+        param.dim_delta_ = N;
+        param.dim_sigma_ = N;
+        param.dim_gamma_ = N;
+        opt.set_min_objective(computeHardObjective, &param);
+
+        //3. Add Equality Constraint
+        EConstParameter ec_param;
+        ec_param.N_  = N;
+        ec_param.ds_ = ds;
+        std::vector<double> ec_tols(N-1, tol);
+        opt.add_equality_mconstraint(computeEqualityConstraint, &ec_param, ec_tols);
+
+        // 4. Add Jerk Constraint
+        JerkConstParameter jc_param;
+        jc_param.N_  = N;
+        jc_param.ds_ = ds;
+        jc_param.j_max_ = jmax;
+        jc_param.j_min_ = jmin;
+        std::vector<double> jc_tols(2*(N-1), tol);
+        opt.add_inequality_mconstraint(computeJerkHardConstraint, &jc_param, jc_tols);
+
+        // 5.Set x tolerance
+        opt.set_xtol_rel(tol);
+
+        // 6. Set Initial x value
+        std::vector<double> x(dim, 0.0);
+        x[0] = initial_vel*initial_vel;
+        x[N] = initial_acc;
+
+        for(int i=1; i<N; ++i)
+            x[i] = max_vels[i] * max_vels[i];
+
+        // Solve the problem
+        double min_f;
+        try
+        {
+            nlopt::result result = opt.optimize(x, min_f);
+
+            std::cout << "nlopt success" << std::endl;
+            std::cout << "Minimum Value: " << min_f << std::endl;
+
+            output.resize(N);
+            for(int i=0; i<N; ++i)
+            {
+                output.velocity[i]     = std::sqrt(std::max(x[i], 0.0));
+                output.acceleration[i] = x[i+N];
+            }
+            for(unsigned int i=0; i<N-1; ++i)
+            {
+                double a_current = output.acceleration[i];
+                double a_next    = output.acceleration[i+1];
+                output.jerk[i] = (a_next - a_current) * output.velocity[i] / ds;
+            }
+            output.jerk[N-1] = output.jerk[N-2];
+        }
+        catch(std::exception & e)
+        {
+            std::cout << "NLOPT Failed: " << e.what() << std::endl;
+            return false;
+        }
 
         return true;
     }
@@ -184,6 +291,29 @@ namespace nlopt
             cost += -x[i] + over_v_weight*0.5*x[i+2*N]*x[i+2*N]
                           + over_a_weight*0.5*x[i+3*N]*x[i+3*N]
                           + over_j_weight*0.5*x[i+4*N]*x[i+4*N];
+
+        return cost;
+    }
+
+    double NCSolver::computeHardObjective(const std::vector<double>& x,
+                                          std::vector<double>& grad,
+                                          void* parameter)
+    {
+        ObjectiveParameter* param = reinterpret_cast<ObjectiveParameter*>(parameter);
+        int N = param->dim_b_;
+
+        if(!grad.empty())
+        {
+            for(int i=0; i<N; ++i)
+                grad[i] = -1.0;
+
+            for(int i=N; i<2*N; ++i)
+                grad[i] = 0.0;
+        }
+
+        double cost = 0.0;
+        for(int i=0; i<N; ++i)
+            cost += -x[i];
 
         return cost;
     }
@@ -350,6 +480,50 @@ namespace nlopt
         {
             result[i]   = (x[i+N+1]-x[i+N])*std::sqrt(x[i]) - x[i+4*N]*ds - jmax*ds;
             result[i+N] = jmin*ds - (x[i+N+1]-x[i+N])*std::sqrt(x[i]) + x[i+4*N]*ds;
+        }
+    }
+
+    void NCSolver::computeJerkHardConstraint(unsigned int m,
+                                             double *result,
+                                             unsigned int n,
+                                             const double *x,
+                                             double *grad,
+                                             void *parameter)
+    {
+        JerkConstParameter * param = reinterpret_cast<JerkConstParameter *>(parameter);
+        int N = param->N_;
+        double ds = param->ds_;
+        double jmax = param->j_max_;
+        double jmin = param->j_min_;
+        assert(2*(N-1)==m);
+
+        if(grad)
+        {
+            for(int i=0; i<m*n; ++i)
+                grad[i] = 0.0;
+
+            for(int i=0; i<N-1; ++i) // for(int i=0; i<m; ++i)
+            {
+                for(int j=0; j<N-1; ++j)
+                {
+                    if(i==j)
+                    {
+                        grad[i*n + j]         =  (x[i+N+1]-x[i+N])/(2*ds*std::sqrt(std::max(x[i], 0.001))); // dc_i/db_i
+                        grad[i*n + j + N]     =  -std::sqrt(x[i])/ds; // dc_i/da_i
+                        grad[i*n + j + N + 1] =   std::sqrt(x[i])/ds; // dc_i/da_i+1
+
+                        grad[(i+N-1)*n + j]   =  -(x[i+N+1]-x[i+N])/(2*std::sqrt(std::max(x[i], 0.001))); // dc_i/db_i
+                        grad[(i+N-1)*n + j + N]     =  std::sqrt(x[i])/ds; // dc_(i+N)/da_i
+                        grad[(i+N-1)*n + j + N + 1] = -std::sqrt(x[i])/ds; // dc_(i+N)/d(da_i+1)
+                    }
+                }
+            }
+        }
+
+        for(int i=0; i<N-1; ++i)
+        {
+            result[i]   = (x[i+N+1]-x[i+N])*std::sqrt(x[i])/ds - jmax;
+            result[i+N] = jmin - (x[i+N+1]-x[i+N])*std::sqrt(x[i])/ds;
         }
     }
 }

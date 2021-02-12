@@ -84,13 +84,13 @@ int main()
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
 
-    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_LP, param);
+    Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
     BaseSolver::OutputInfo output;
 
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
 
-    optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
+    bool result = optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
 
     end = std::chrono::system_clock::now();
     double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
@@ -107,11 +107,16 @@ int main()
                   << "   qp_jerk: " << std::setprecision(5) << output.jerk[i] << std::endl;
                   */
 
-    std::string qp_filename = "../result/filter_qp/qp_result.csv";
-    std::string velocity_filename = "../result/filter_qp/reference_velocity.csv";
-    //Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
-    Utils::outputVelocityToFile(velocity_filename, position, obs_filtered_vels, filtered_vel, filtered_acc);
-    Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk);
+    if(result)
+    {
+        std::string qp_filename = "../result/filter_qp/qp_result.csv";
+        std::string velocity_filename = "../result/filter_qp/reference_velocity.csv";
+        //Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
+        Utils::outputVelocityToFile(velocity_filename, position, obs_filtered_vels, filtered_vel, filtered_acc);
+        Utils::outputResultToFile(qp_filename, position, output.velocity, output.acceleration, output.jerk);
+    }
+    else
+        std::cerr << "Solver Failure" << std::endl;
 
     return 0;
 }

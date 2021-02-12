@@ -14,7 +14,7 @@ if __name__ == '__main__':
     nc_data = pd.read_csv(path+"/result/nonconvex_jerk/nc_result.csv")
 
     fig = plt.figure(figsize=(14, 10))
-    plt.ylim([-2.5, 3.5])
+    plt.ylim([-2.5, 5.5])
     plt.plot(nc_data['qp_position'], nc_data['qp_velocity'], label="nc_vel", color="b")
     plt.plot(nc_data['qp_position'], nc_data['qp_acceleration'], label="nc_acc", color="red")
     plt.plot(nc_data['qp_position'], nc_data['qp_jerk'], label="nc_jerk", color="purple")
@@ -26,3 +26,4 @@ if __name__ == '__main__':
     plt.tick_params(labelsize=18)
     plt.legend(fontsize=18)
     plt.show()
+

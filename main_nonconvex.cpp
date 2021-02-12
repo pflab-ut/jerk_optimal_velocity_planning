@@ -13,7 +13,7 @@ int main()
     /***************************************************/
     /*************** Velocity Profile ******************/
     /***************************************************/
-    const int N = 100;
+    const int N = 300;
     const double initial_vel = 0.5;
     const double initial_acc = 0.0;
     const double ds = 0.1;
@@ -27,24 +27,46 @@ int main()
     for(int i=0; i<N; ++i)
         position[i] = i*ds;
 
-    for(int i=0; i<30; ++i)
-        original_vel[i] = 2.0;
-    for(int i=30; i<80; ++i)
+    for(int i=0; i<100; ++i)
         original_vel[i] = 3.0;
-    for(int i=80; i<N; ++i)
-        original_vel[i] = 1.0;
+    for(int i=100; i<200; ++i)
+        original_vel[i] = 5.0;
+    for(int i=200; i<N; ++i)
+        original_vel[i] = 4.0;
     original_vel.back() = 0.0;
+
+    /***************************************************/
+    /******************* Obstacle **********************/
+    /***************************************************/
+    const int obs_size = 50;
+    const double obs_v = 2.0;
+    const double dt = 0.1;
+    const double s0 = 10.0;
+    const double t0 = 2.0;
+    Obstacle obs(obs_size, obs_v, dt, s0, t0);
+
+    /***************************************************/
+    /********** Obstacle Filter Velocity ***************/
+    /***************************************************/
+    Filter vel_filter;
+    std::vector<double> obs_filtered_vels;
+    vel_filter.obstacleVelocityLimitFilter(initial_vel, position, original_vel, obs, obs_filtered_vels);
+
+    std::string obs_filtered_filename = "../result/nonconvex_jerk/obs_filtered.csv";
+    Utils::outputVelocityToFile(obs_filtered_filename, position, original_vel, obs_filtered_vels);
+
+    std::string st_filename = "../result/nonconvex_jerk/st_graph.csv";
+    Utils::outputSTToFile(st_filename, position, original_vel, obs_filtered_vels, obs);
 
     /***************************************************/
     /*************** Filter Velocity *******************/
     /***************************************************/
-    Filter vel_filter;
     std::vector<double> filtered_vel;
     std::vector<double> filtered_acc;
-    vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, original_vel, filtered_vel, filtered_acc);
+    vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, obs_filtered_vels, filtered_vel, filtered_acc);
 
     /***************************************************/
-    /*************** QP Optimization +******************/
+    /*************** Nonconvex Optimization +***********/
     /***************************************************/
     BaseSolver::OptimizerParam param{};
     param.max_accel = 1.0;
@@ -61,24 +83,32 @@ int main()
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
 
-    optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
+    //bool result = optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, filtered_vel, output);
+    bool result = optimizer.solve(initial_vel, initial_acc, ds, filtered_vel, output);
 
     end = std::chrono::system_clock::now();
     double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
     std::cout << "Calulation Time: " << elapsed << "[ms]" << std::endl;
 
-    for(int i=0; i<original_vel.size(); ++i)
-        std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
-                  << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
-                  << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
-                  << "   nc_velocity: " << std::setprecision(5) << output.velocity[i]
-                  << "   nc_acceleration: " << std::setprecision(5) << output.acceleration[i]
-                  << "   nc_jerk: " << std::setprecision(5) << output.jerk[i] << std::endl;
+    if(result)
+    {
+        for(int i=0; i<original_vel.size(); ++i)
+            std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
+                      << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
+                      << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
+                      << "   nc_velocity: " << std::setprecision(5) << output.velocity[i]
+                      << "   nc_acceleration: " << std::setprecision(5) << output.acceleration[i]
+                      << "   nc_jerk: " << std::setprecision(5) << output.jerk[i] << std::endl;
 
-    std::string nc_filename = "../result/nonconvex_jerk/nc_result.csv";
-    std::string velocity_filename = "../result/nonconvex_jerk/reference_velocity.csv";
-    Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
-    Utils::outputResultToFile(nc_filename, position, output.velocity, output.acceleration, output.jerk);
+        std::string nc_filename = "../result/nonconvex_jerk/nc_result.csv";
+        std::string velocity_filename = "../result/nonconvex_jerk/reference_velocity.csv";
+        //Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
+        Utils::outputVelocityToFile(velocity_filename, position, obs_filtered_vels, filtered_vel, filtered_acc);
+        Utils::outputResultToFile(nc_filename, position, output.velocity, output.acceleration, output.jerk);
+    }
+    else
+        std::cerr << "Solver Failure" << std::endl;
+
 
     return 0;
 };

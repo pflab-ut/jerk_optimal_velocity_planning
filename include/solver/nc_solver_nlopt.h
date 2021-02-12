@@ -68,6 +68,10 @@ namespace nlopt
                                        std::vector<double>& grad,
                                        void* parameter);
 
+        static double computeHardObjective(const std::vector<double>& x,
+                                           std::vector<double>& grad,
+                                           void* parameter);
+
         static void computeEqualityConstraint(unsigned m,
                                               double* result,
                                               unsigned n,
@@ -95,6 +99,13 @@ namespace nlopt
                                           const double* x,
                                           double* grad,
                                           void* parameter);
+
+        static void computeJerkHardConstraint(unsigned m,
+                                              double* result,
+                                              unsigned n,
+                                              const double* x,
+                                              double* grad,
+                                              void* parameter);
     };
 }
 
