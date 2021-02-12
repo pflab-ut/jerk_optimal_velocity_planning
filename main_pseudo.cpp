@@ -71,7 +71,7 @@ int main()
     param.over_v_weight = 1000;
     Optimizer optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
     BaseSolver::OutputInfo output;
-    bool is_hard = false;
+    bool is_hard = true;
 
     bool result = optimizer.solvePseudo(is_hard, initial_vel, initial_acc, ds, obs_filtered_vels, obs_filtered_vels, output);
 
