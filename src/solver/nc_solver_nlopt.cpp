@@ -165,7 +165,7 @@ namespace nlopt
         const double jmin = param_.min_jerk;
 
         nlopt::opt opt(nlopt::LD_SLSQP, dim); //algorithm and dimension of the problem
-        opt.set_maxeval(400000);
+        //opt.set_maxeval(400000000);
 
         //  1. Create Input Constraint
         std::vector<double> lb(dim); // Lower Bound
@@ -225,7 +225,7 @@ namespace nlopt
         x[N] = initial_acc;
 
         for(int i=1; i<N; ++i)
-            x[i] = max_vels[i] * max_vels[i];
+            x[i] = ref_vels[i] * ref_vels[i];
 
         // Solve the problem
         double min_f;
