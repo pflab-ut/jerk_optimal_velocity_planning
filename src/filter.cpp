@@ -141,17 +141,6 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
     for(auto it = it_cutin_arclength; it!=it_cutout_arclength; ++it)
         arclength_inner.push_back(*it);
 
-    std::cout << "obs size: " << obstacle.s_.size() << std::endl;
-    std::cout << "intersection size: " << intersection_arclength.size() << std::endl;
-    std::cout << "arclength_inner size: " << arclength_inner.size() << std::endl;
-
-    std::cout << "obs front s: " << obstacle.s_.front() << std::endl;
-    std::cout << "obs last s: " << obstacle.s_.back() << std::endl;
-    std::cout << "intersection front s: " << intersection_arclength.front() << std::endl;
-    std::cout << "intersection last s: " << intersection_arclength.back() << std::endl;
-    std::cout << "inner front s: " << arclength_inner.front() << std::endl;
-    std::cout << "inner back s: " << arclength_inner.back() << std::endl;
-
     // 3. interpolate intersection time
     std::vector<double> time_inner;
     if(!LinearInterpolate::interpolate(intersection_arclength, intersection_time, arclength_inner, time_inner))
@@ -160,12 +149,9 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
         return false;
     }
 
-    std::cout << "intersection last t: " << intersection_time.back() << std::endl;
-    std::cout << "time inner last t: " << time_inner.back() << std::endl;
 
     const size_t idx_cutin = std::distance(input_arclength.begin(), it_cutin_arclength);
     const size_t idx_cutout = std::distance(input_arclength.begin(), it_cutout_arclength);
-    std::cout << "idx cutout: " << idx_cutout << std::endl;
 
     //4. Set Velocity Limits
     //double t = input_arclength[1]/std::max(initial_vel, 0.1);
@@ -198,12 +184,6 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
                     j_nearest = j;
                 }
             }
-            std::cout << "i: " << i << std::endl;
-            std::cout << "j_nearest: " << j_nearest << std::endl;
-            std::cout << "input_arclength["<< i << "]: " << input_arclength[i] << std::endl;
-            std::cout << "nearest_s: " << nearest_s << std::endl;
-            std::cout << "nearest_t: " << nearest_t << std::endl;
-            std::cout << "------------------" << std::endl;
 
             if(nearest_s < range_s_1 && nearest_t < range_t)
             {

@@ -50,7 +50,14 @@ int main()
     /***************************************************/
     Filter vel_filter;
     std::vector<double> obs_filtered_vels;
+
+    std::chrono::system_clock::time_point  start_obs, end_obs;
+    start_obs = std::chrono::system_clock::now();
     vel_filter.obstacleVelocityLimitFilter(initial_vel, position, original_vel, obs, obs_filtered_vels);
+
+    end_obs = std::chrono::system_clock::now();
+    double elapsed_obs = std::chrono::duration_cast<std::chrono::nanoseconds>(end_obs - start_obs).count();
+    std::cout << "Obstacle Calulation Time: " << elapsed_obs /1000000 << "[ms]" << std::endl;
 
     std::string obs_filtered_filename = "../result/filter_qp/obs_filtered.csv";
     Utils::outputVelocityToFile(obs_filtered_filename, position, original_vel, obs_filtered_vels);
@@ -63,14 +70,16 @@ int main()
     /***************************************************/
     std::vector<double> filtered_vel;
     std::vector<double> filtered_acc;
+
+    std::chrono::system_clock::time_point  start_filter, end_filter;
+    start_filter = std::chrono::system_clock::now();
+
     vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, obs_filtered_vels, filtered_vel, filtered_acc);
     //vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, filtered_vel, filtered_vel, filtered_acc);
 
-    for(int i=0; i<original_vel.size(); ++i)
-        std::cout << std::fixed << "s[" << i << "]" << std::setprecision(1) << position[i]
-                  << "   v[" << i << "]: " << std::setprecision(3) << original_vel[i]
-                  << "   Filtered Velocity: " << std::setprecision(3) << filtered_vel[i]
-                  << "   Acc: " << std::setprecision(5) << filtered_acc[i] << std::endl;
+    end_filter = std::chrono::system_clock::now();
+    double elapsed_filter = std::chrono::duration_cast<std::chrono::nanoseconds>(end_filter-start_filter).count();
+    std::cout << "Filter Calulation Time: " << elapsed_filter/1000000 << "[ms]" << std::endl;
 
     /***************************************************/
     /*************** QP Optimization +******************/
