@@ -1,0 +1,3 @@
+file(REMOVE_RECURSE
+  "libFILTER_LIB.a"
+)

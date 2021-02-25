@@ -65,7 +65,7 @@ int main()
     param.min_decel = -1.0;
     param.max_jerk = 0.8;
     param.min_jerk = -0.8;
-    param.smooth_weight = 100.0;
+    param.smooth_weight = 500.0;
     param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;

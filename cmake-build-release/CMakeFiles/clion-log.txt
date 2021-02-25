@@ -1,0 +1,4 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" /Users/yutaka/CLionProjects/filter_position_optimization
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/yutaka/CLionProjects/filter_position_optimization/cmake-build-release

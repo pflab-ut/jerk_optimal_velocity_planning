@@ -41,10 +41,18 @@ namespace Utils
     {
         std::ofstream writing_file;
         writing_file.open(filename, std::ios::out);
-        writing_file << "qp_position" <<  "," << "qp_velocity" << "," << "qp_acceleration" << "," << "qp_jerk" << std::endl;
+        writing_file << "qp_position" << "," << "time" <<  "," << "qp_velocity" << "," << "qp_acceleration" << "," << "qp_jerk" << std::endl;
 
-        for(int i=0; i<qp_velocity.size(); ++i)
-            writing_file << position[i] << "," << qp_velocity[i] << "," << qp_acceleration[i] << "," << qp_jerk[i] << std::endl;
+        double t=0.0;
+        writing_file << position.front() << "," << t << "," << qp_velocity.front() << ","
+                     << qp_acceleration.front() << "," << qp_jerk.front() << std::endl;
+        for(int i=1; i<qp_velocity.size(); ++i)
+        {
+            double ds = position[i] - position[i-1];
+            t += (ds/std::max(qp_velocity[i], 0.1));
+            writing_file << position[i] << "," << t << "," << qp_velocity[i] << ","
+                         << qp_acceleration[i] << "," << qp_jerk[i] << std::endl;
+        }
 
         writing_file.close();
     }
