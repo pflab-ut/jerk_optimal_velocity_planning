@@ -23,3 +23,13 @@ make
 ```
 ./filter_position_opt
 ```
+
+- Nonconvex Optimization
+```
+./nonconvex_opt
+```
+
+- Pseudo Jerk Optimization
+```
+./pseudo_opt
+```
