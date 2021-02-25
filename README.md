@@ -36,4 +36,4 @@ make
 
 ## Result
 - Scenario1
-
+![Scenrio1](https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/scenario1.png)
