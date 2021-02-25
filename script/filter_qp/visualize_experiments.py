@@ -34,7 +34,7 @@ if __name__ == '__main__':
     ax3 = fig.add_subplot(313)
 
     ax1.plot(lp_data['qp_position'], lp_data['qp_velocity'], label="LP", color="blue", linewidth=linewidth_)
-    ax1.plot(nc_data['qp_position'], nc_data['qp_velocity'], label="Non-Convex", color=(1, 0, 0, 0.1,), linewidth=linewidth_,)
+    ax1.plot(nc_data['qp_position'], nc_data['qp_velocity'], label="Non-Convex", color="red", linewidth=linewidth_,)
     ax1.plot(pseudo_data['qp_position'], pseudo_data['qp_velocity'], label="Pseudo-QP", color="green", linewidth=linewidth_,)
     #ax1.plot(obs_filtered_data['position'], obs_filtered_data['original_velocity'], label="Maximum Velocity", color="black", linewidth=linewidth_)
     ax1.plot(ref_vel_data["position"], ref_vel_data["original_velocity"], color="purple", label="Obstacle Avoidance Velocity", linewidth=linewidth_, linestyle="dashed")
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     ax1.legend(loc="lower center", bbox_to_anchor=(.5, 1.0), ncol=2, fontsize=legend_size_)
 
     ax2.plot(lp_data['qp_position'], lp_data['qp_acceleration'], color="blue",linewidth=linewidth_)
-    ax2.plot(nc_data['qp_position'], nc_data['qp_acceleration'], color=(1,0,0,0.1,), linewidth=linewidth_,)
+    ax2.plot(nc_data['qp_position'], nc_data['qp_acceleration'], color="red", linewidth=linewidth_,)
     ax2.plot(pseudo_data['qp_position'], pseudo_data['qp_acceleration'], color="green", linewidth=linewidth_,)
     ax2.set_xlabel("s [m]", fontsize=fontsize_)
     ax2.set_ylabel("acceleration [m/s^2]", fontsize=fontsize_)
@@ -63,4 +63,4 @@ if __name__ == '__main__':
     ax3.tick_params(labelsize=fontsize_)
     ax3.legend(fontsize=legend_size_)
 
-    plt.savefig('/Users/yutaka/Desktop/experiment_results.eps', bbox_inches="tight", pad_inches=0.05)
+    plt.savefig('/Users/yutaka/Desktop/experiment_results.png', bbox_inches="tight", pad_inches=0.05)
