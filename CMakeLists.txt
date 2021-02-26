@@ -33,7 +33,8 @@ add_library(FILTER_LIB src/interpolate.cpp
                        src/solver/nc_solver_nlopt.cpp
                        src/filter.cpp
                        src/utils.cpp
-                       src/optimizer.cpp)
+                       src/optimizer.cpp
+                       src/scenario_generator.cpp)
 target_link_libraries(FILTER_LIB gurobi_c++)
 target_link_libraries(FILTER_LIB gurobi90)
 if(APPLE)

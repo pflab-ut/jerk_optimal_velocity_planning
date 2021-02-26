@@ -7,63 +7,35 @@
 #include "optimizer.h"
 #include "utils.h"
 #include "obstacle.h"
+#include "scenario_generator.h"
 
 int main()
 {
-    /***************************************************/
-    /*************** Velocity Profile ******************/
-    /***************************************************/
-    const int N = 300;
-    const double initial_vel = 0.5;
-    const double initial_acc = 0.0;
-    const double ds = 0.1;
-    const double max_acc= 1.0;
-    const double jerk_acc = 0.8;
+    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Normal;
+    ScenarioGenerator generator;
 
-    std::vector<double> position(N, 0.0);
-    std::vector<double> original_vel(N, 0.0);
-
-    // position
-    for(int i=0; i<N; ++i)
-        position[i] = i*ds;
-
-    for(int i=0; i<100; ++i)
-        original_vel[i] = 3.0;
-    for(int i=100; i<200; ++i)
-        original_vel[i] = 5.0;
-    for(int i=200; i<N; ++i)
-        original_vel[i] = 4.0;
-    original_vel.back() = 0.0;
-
-    /***************************************************/
-    /******************* Obstacle **********************/
-    /***************************************************/
-    const int obs_size = 50;
-    const double obs_v = 2.0;
-    const double dt = 0.1;
-    const double s0 = 10.0;
-    const double t0 = 2.0;
-    Obstacle obs(obs_size, obs_v, dt, s0, t0);
+    ScenarioGenerator::ScenarioData data;
+    generator.generate(num, data);
 
     /***************************************************/
     /********** Obstacle Filter Velocity ***************/
     /***************************************************/
     Filter vel_filter;
     std::vector<double> obs_filtered_vels;
-    vel_filter.obstacleVelocityLimitFilter(initial_vel, position, original_vel, obs, obs_filtered_vels);
+    vel_filter.obstacleVelocityLimitFilter(data.v0_, data.positions_, data.max_velocities_, data.obs_, obs_filtered_vels);
 
     std::string obs_filtered_filename = "../result/nonconvex_jerk/obs_filtered.csv";
-    Utils::outputVelocityToFile(obs_filtered_filename, position, original_vel, obs_filtered_vels);
+    Utils::outputVelocityToFile(obs_filtered_filename, data.positions_, data.max_velocities_, obs_filtered_vels);
 
     std::string st_filename = "../result/nonconvex_jerk/st_graph.csv";
-    Utils::outputSTToFile(st_filename, position, original_vel, obs_filtered_vels, obs);
+    Utils::outputSTToFile(st_filename, data.positions_, data.max_velocities_, obs_filtered_vels, data.obs_);
 
     /***************************************************/
     /*************** Filter Velocity *******************/
     /***************************************************/
     std::vector<double> filtered_vel;
     std::vector<double> filtered_acc;
-    vel_filter.smoothVelocity(ds, initial_vel, initial_acc, max_acc, jerk_acc, obs_filtered_vels, filtered_vel, filtered_acc);
+    vel_filter.smoothVelocity(data.ds_, data.v0_, data.a0_, data.max_acc_, data.max_jerk_, obs_filtered_vels, filtered_vel, filtered_acc);
 
     /***************************************************/
     /*************** Nonconvex Optimization +***********/
@@ -84,7 +56,7 @@ int main()
     std::chrono::system_clock::time_point  start, end;
     start = std::chrono::system_clock::now();
 
-    bool result = optimizer.solve(is_hard, initial_vel, initial_acc, ds, obs_filtered_vels, obs_filtered_vels, output);
+    bool result = optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, obs_filtered_vels, obs_filtered_vels, output);
 
     end = std::chrono::system_clock::now();
     double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
@@ -94,9 +66,8 @@ int main()
     {
         std::string nc_filename = "../result/nonconvex_jerk/nc_result.csv";
         std::string velocity_filename = "../result/nonconvex_jerk/reference_velocity.csv";
-        //Utils::outputVelocityToFile(velocity_filename, position, original_vel, filtered_vel, filtered_acc);
-        Utils::outputVelocityToFile(velocity_filename, position, obs_filtered_vels, obs_filtered_vels, obs_filtered_vels);
-        Utils::outputResultToFile(nc_filename, position, output.velocity, output.acceleration, output.jerk);
+        Utils::outputVelocityToFile(velocity_filename, data.positions_, obs_filtered_vels, obs_filtered_vels, obs_filtered_vels);
+        Utils::outputResultToFile(nc_filename, data.positions_, output.velocity, output.acceleration, output.jerk);
     }
     else
         std::cerr << "Solver Failure" << std::endl;

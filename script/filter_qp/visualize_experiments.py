@@ -63,4 +63,4 @@ if __name__ == '__main__':
     ax3.tick_params(labelsize=fontsize_)
     ax3.legend(fontsize=legend_size_)
 
-    plt.savefig('/Users/yutaka/Desktop/experiment_results.png', bbox_inches="tight", pad_inches=0.05)
+    plt.savefig('/Users/yutaka/Desktop/experiment_results.eps', bbox_inches="tight", pad_inches=0.05)
