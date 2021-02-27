@@ -35,5 +35,6 @@ if __name__ == '__main__':
     ax1.tick_params(labelsize=50)
     ax1.legend(fontsize=40)
 
-    plt.savefig('/Users/yutaka/Desktop/experiment_obstacle_avoidance.eps', bbox_inches="tight", pad_inches=0.05)
-    #plt.show()
+    userhome = os.path.expanduser('~')
+    desktop_path = userhome + '/Desktop/'
+    plt.savefig(desktop_path + 'experiment_obstacle_avoidance.eps', bbox_inches="tight", pad_inches=0.05)
