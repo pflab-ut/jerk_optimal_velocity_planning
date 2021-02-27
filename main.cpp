@@ -11,6 +11,9 @@
 
 int main()
 {
+    const std::string current_dir = std::string(RESULT_DIR);
+    std::cout << current_dir << std::endl;
+
     ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Normal;
     ScenarioGenerator generator;
 
@@ -31,7 +34,7 @@ int main()
     double elapsed_obs = std::chrono::duration_cast<std::chrono::nanoseconds>(end_obs - start_obs).count();
     std::cout << "Obstacle Calulation Time: " << elapsed_obs /1000000 << "[ms]" << std::endl;
 
-    std::string obs_filename = "../result/obs.csv";
+    std::string obs_filename = current_dir + "/result/obs.csv";
     Utils::outputObsToFile(obs_filename, data.obs_);
 
     /***************************************************/
@@ -129,7 +132,7 @@ int main()
 
     std::cout << "Non-Convex Solver Calculation Time: " << nc_elapsed << "[ms]" << std::endl;
 
-    std::string filename = "../result/optimization_result.csv";
+    std::string filename = current_dir + "/result/optimization_result.csv";
     Utils::outputToFile(filename, data.positions_,
                         data.max_velocities_, obs_filtered_vels, jerk_filtered_vels,
                         lp_output, qp_output, nc_output);
