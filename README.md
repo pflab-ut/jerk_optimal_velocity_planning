@@ -19,21 +19,22 @@ make
 ```
 
 #### 2. Running Code
-- Proposed Methodology
+- Running the main code
 ```
 ./filter_position_opt
 ```
 
-- Nonconvex Optimization
-```
-./nonconvex_opt
+- Running the visualization code
+```asm
+python3 visualize_experiments.py
 ```
 
-- Pseudo Jerk Optimization
+- Running the st graph code
+```asm
+python3 visualize_st.py
 ```
-./pseudo_opt
-```
+
 
 ## Result
-- Scenario1
+- Scenario Normal
 <img src="https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/scenario1.png" width=50%>
