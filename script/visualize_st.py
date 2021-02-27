@@ -22,7 +22,7 @@ if __name__ == '__main__':
     plt.rcParams['axes.linewidth'] = 1.0 # axis line width
     plt.rcParams['axes.grid'] = True # make grid
 
-    fig = plt.figure(figsize=(13, 9))
+    fig = plt.figure(figsize=(13, 10))
     ax1 = fig.add_subplot(111)
 
     ax1.plot(obs_data['obs_time'], obs_data['obs_s'], label="Obstacle", color="black", linewidth=linewidth_, linestyle="dashed")

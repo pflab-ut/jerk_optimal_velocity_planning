@@ -8,7 +8,7 @@ import platform
 import os
 
 if __name__ == '__main__':
-    os.chdir('../../')
+    os.chdir('../')
     path = os.getcwd()
     data = pd.read_csv(path+"/result/optimization_result.csv")
 
