@@ -8,11 +8,10 @@ import platform
 import os
 
 if __name__ == '__main__':
-    os.chdir('../../')
+    os.chdir('../')
     path = os.getcwd()
-    data = pd.read_csv(path+"/result/filter_qp/st_graph.csv")
-    opt_data = pd.read_csv(path+"/result/filter_qp/qp_result.csv")
-    obs_filtered_data = pd.read_csv(path+"/result/filter_qp/obs_filtered.csv")
+    obs_data = pd.read_csv(path+"/result/obs.csv")
+    opt_data = pd.read_csv(path+"/result/optimization_result.csv")
 
     linewidth_ = 5.5
 
@@ -26,10 +25,11 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(13, 9))
     ax1 = fig.add_subplot(111)
 
-    ax1.plot(data['obs_time'], data['obs_s'], label="Obstacle", color="black", linewidth=linewidth_, linestyle="dashed")
-    ax1.plot(data['original_t'], data['position'], label="Original", color="black", linewidth=linewidth_)
-    ax1.plot(data['filtered_t'], data['position'], label="Avoidance", color="purple", linewidth=linewidth_)
-    ax1.plot(opt_data['time'], opt_data['qp_position'], label="LP", color="blue", linewidth=linewidth_)
+    ax1.plot(obs_data['obs_time'], obs_data['obs_s'], label="Obstacle", color="black", linewidth=linewidth_, linestyle="dashed")
+    ax1.plot(opt_data['max_time'], opt_data['position'], label="Original", color="black", linewidth=linewidth_)
+    ax1.plot(opt_data['obs_filtered_time'], opt_data['position'], label="Avoidance", color="purple", linewidth=linewidth_)
+    ax1.plot(opt_data['jerk_filtered_time'], opt_data['position'], label="Jerk Filter", color="orange", linewidth=linewidth_)
+    ax1.plot(opt_data['lp_time'], opt_data['position'], label="LP", color="blue", linewidth=linewidth_)
     ax1.set_xlabel("t [s]", fontsize=50)
     ax1.set_ylabel("s [m]", fontsize=50)
     ax1.tick_params(labelsize=50)

@@ -10,38 +10,21 @@
 #include <fstream>
 #include <cassert>
 #include "obstacle.h"
+#include "solver/base_solver.h"
 
 namespace Utils
 {
-    void outputVelocityToFile(const std::string& filename,
-                              const std::vector<double>& position,
-                              const std::vector<double>& original_velocity,
-                              const std::vector<double>& filtered_velocity);
+    void outputToFile(const std::string& filename,
+                      const std::vector<double>& position,
+                      const std::vector<double>& max_vels,
+                      const std::vector<double>& obs_filtered_vels,
+                      const std::vector<double>& jerk_filtered_vels,
+                      const BaseSolver::OutputInfo& lp_output,
+                      const BaseSolver::OutputInfo& qp_output,
+                      const BaseSolver::OutputInfo& nc_output);
 
-    void outputVelocityToFile(const std::string& filename,
-                              const std::vector<double>& position,
-                              const std::vector<double>& original_velocity,
-                              const std::vector<double>& filtered_velocity,
-                              const std::vector<double>& filtered_acc);
-
-    void outputResultToFile(const std::string& filename,
-                            const std::vector<double>& position,
-                            const std::vector<double>& qp_velocity,
-                            const std::vector<double>& qp_acceleration,
-                            const std::vector<double>& qp_jerk);
-
-    void outputResultToFile(const std::string& filename,
-                            const std::vector<double>& position,
-                            const std::vector<double>& qp_velocity,
-                            const std::vector<double>& qp_acceleration,
-                            const std::vector<double>& qp_jerk,
-                            const std::vector<double>& ref_vels);
-
-    void outputSTToFile(const std::string& filename,
-                        const std::vector<double>& position,
-                        const std::vector<double>& original_vels,
-                        const std::vector<double>& filtered_vels,
-                        const Obstacle& obs);
+    void outputObsToFile(const std::string& filename,
+                         const Obstacle& obs);
 }
 
 #endif //FILTER_POSITION_OPTIMIZATION_UTILS_H

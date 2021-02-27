@@ -45,10 +45,3 @@ endif()
 
 add_executable(filter_position_opt main.cpp)
 target_link_libraries(filter_position_opt PRIVATE FILTER_LIB)
-
-add_executable(pseudo_opt main_pseudo.cpp)
-target_link_libraries(pseudo_opt PRIVATE FILTER_LIB)
-
-add_executable(nonconvex_opt main_nonconvex.cpp)
-target_link_libraries(nonconvex_opt PRIVATE FILTER_LIB)
-

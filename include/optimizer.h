@@ -35,6 +35,8 @@ public:
                      const std::vector<double>& max_vels,
                      BaseSolver::OutputInfo& output);
 
+    void computeTime(const double& ds, BaseSolver::OutputInfo& output);
+
 private:
     std::shared_ptr<BaseSolver> solver_;
 };

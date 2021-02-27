@@ -18,10 +18,19 @@ bool Optimizer::solve(const bool& is_hard,
                       const std::vector<double>& max_vels,
                       BaseSolver::OutputInfo& output)
 {
+    bool is_success = false;
     if(is_hard)
-        return solver_->solveHard(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
+        is_success = solver_->solveHard(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
     else
-        return solver_->solveSoft(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
+        is_success = solver_->solveSoft(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
+
+    // Compute Time
+    if(!is_success)
+        return is_success;
+    else
+        computeTime(ds, output);
+
+    return true;
 }
 
 bool Optimizer::solvePseudo(const bool& is_hard,
@@ -32,8 +41,28 @@ bool Optimizer::solvePseudo(const bool& is_hard,
                             const std::vector<double>& max_vels,
                             BaseSolver::OutputInfo& output)
 {
+    bool is_success = false;
     if(is_hard)
-        return solver_->solveHardPseudo(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
+        is_success = solver_->solveHardPseudo(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
     else
-        return solver_->solveSoftPseudo(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
+        is_success = solver_->solveSoftPseudo(initial_vel, initial_acc, ds, ref_vels, max_vels, output);
+
+    // Compute Time
+    if(!is_success)
+        return is_success;
+    else
+        computeTime(ds, output);
+
+    return true;
+}
+
+void Optimizer::computeTime(const double& ds, BaseSolver::OutputInfo& output)
+{
+    double t = 0.0;
+    output.time.front() = t;
+    for(int i=1; i<output.velocity.size(); ++i)
+    {
+        t += (ds/std::max(output.velocity[i], 0.1));
+        output.time[i] = t;
+    }
 }

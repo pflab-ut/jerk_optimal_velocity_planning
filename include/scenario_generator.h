@@ -13,6 +13,7 @@ public:
     enum ScenarioNumber
     {
         Normal = 0,
+        Accelerate = 1,
     };
 
     struct ScenarioData
@@ -38,6 +39,7 @@ public:
 
     void generate(const ScenarioNumber& scenario_num, ScenarioData& scenario_data);
     void generateNormalScenario(ScenarioData& scenario_data);
+    void generateAccelerateScenario(ScenarioData& scenario_data);
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_SCENARIO_GENERATOR_H

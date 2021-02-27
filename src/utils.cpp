@@ -2,124 +2,70 @@
 
 namespace Utils
 {
-    void outputVelocityToFile(const std::string& filename,
-                              const std::vector<double>& position,
-                              const std::vector<double>& original_velocity,
-                              const std::vector<double>& filtered_velocity)
+    void outputObsToFile(const std::string& filename,
+                         const Obstacle& obs)
     {
-        assert(original_velocity.size() == filtered_velocity.size());
-        std::ofstream writing_file;
-        writing_file.open(filename, std::ios::out);
-        writing_file << "position" << "," << "original_velocity" << "," << "filtered_velocity" << std::endl;
-        for(int i=0; i<original_velocity.size(); ++i)
-            writing_file << position[i] << "," << original_velocity[i] << "," << filtered_velocity[i] << std::endl;
-
-        writing_file.close();
-    }
-
-    void outputVelocityToFile(const std::string& filename,
-                              const std::vector<double>& position,
-                              const std::vector<double>& original_velocity,
-                              const std::vector<double>& filtered_velocity,
-                              const std::vector<double>& filtered_acc)
-    {
-        assert(original_velocity.size() == filtered_velocity.size());
-        std::ofstream writing_file;
-        writing_file.open(filename, std::ios::out);
-        writing_file << "position" << "," << "original_velocity" << "," << "filtered_velocity" << ","  << "filtered_acc" << std::endl;
-        for(int i=0; i<original_velocity.size(); ++i)
-            writing_file << position[i] << "," << original_velocity[i] << "," << filtered_velocity[i] << "," << filtered_acc[i] << std::endl;
-
-        writing_file.close();
-    }
-
-    void outputResultToFile(const std::string& filename,
-                            const std::vector<double>& position,
-                            const std::vector<double>& qp_velocity,
-                            const std::vector<double>& qp_acceleration,
-                            const std::vector<double>& qp_jerk)
-    {
-        std::ofstream writing_file;
-        writing_file.open(filename, std::ios::out);
-        writing_file << "qp_position" << "," << "time" <<  "," << "qp_velocity" << "," << "qp_acceleration" << "," << "qp_jerk" << std::endl;
-
-        double t=0.0;
-        writing_file << position.front() << "," << t << "," << qp_velocity.front() << ","
-                     << qp_acceleration.front() << "," << qp_jerk.front() << std::endl;
-        for(int i=1; i<qp_velocity.size(); ++i)
-        {
-            double ds = position[i] - position[i-1];
-            t += (ds/std::max(qp_velocity[i], 0.1));
-            writing_file << position[i] << "," << t << "," << qp_velocity[i] << ","
-                         << qp_acceleration[i] << "," << qp_jerk[i] << std::endl;
-        }
-
-        writing_file.close();
-    }
-
-    void outputResultToFile(const std::string& filename,
-                            const std::vector<double>& position,
-                            const std::vector<double>& qp_velocity,
-                            const std::vector<double>& qp_acceleration,
-                            const std::vector<double>& qp_jerk,
-                            const std::vector<double>& ref_vels)
-    {
-        std::ofstream writing_file;
-        writing_file.open(filename, std::ios::out);
-        writing_file << "qp_position" <<  "," << "ref_velocity" << "," << "qp_velocity" << "," << "qp_acceleration" << "," << "qp_jerk" << std::endl;
-
-        for(int i=0; i<qp_velocity.size(); ++i)
-            writing_file << position[i] << "," << ref_vels[i] << "," << qp_velocity[i] << ","
-                         << qp_acceleration[i] << "," << qp_jerk[i] << std::endl;
-
-        writing_file.close();
-
-    }
-
-    void outputSTToFile(const std::string& filename,
-                        const std::vector<double>& position,
-                        const std::vector<double>& original_vels,
-                        const std::vector<double>& filtered_vels,
-                        const Obstacle& obs)
-    {
-        assert(position.size() == original_vels.size());
-        assert(position.size() == filtered_vels.size());
-        std::vector<double> original_time(position.size());
-        std::vector<double> filtered_time(position.size());
         double t0 = 0.0;
-        original_time.front() = t0;
-        filtered_time.front() = t0;
 
-        for(int i=0; i<original_vels.size()-1; ++i)
-        {
-            double ds = position[i+1] - position[i];
-            double dt = 0.0;
-            if(original_vels[i] > 0.1)
-                dt = ds / original_vels[i];
-            original_time[i+1] = original_time[i] + dt;
-        }
+        std::ofstream writing_file;
+        writing_file.open(filename, std::ios::out);
+        writing_file << "obs_time" <<  "," << "obs_s" << std::endl;
 
-        for(int i=0; i<filtered_vels.size()-1; ++i)
+        for(int i=0; i<obs.s_.size(); ++i)
+            writing_file << obs.t_[i] << "," << obs.s_[i] << std::endl;
+
+        writing_file.close();
+    }
+
+    void outputToFile(const std::string& filename,
+                      const std::vector<double>& positions,
+                      const std::vector<double>& max_vels,
+                      const std::vector<double>& obs_filtered_vels,
+                      const std::vector<double>& jerk_filtered_vels,
+                      const BaseSolver::OutputInfo& lp_output,
+                      const BaseSolver::OutputInfo& qp_output,
+                      const BaseSolver::OutputInfo& nc_output)
+    {
+        assert(positions.size() == max_vels.size());
+        assert(positions.size() == obs_filtered_vels.size());
+        assert(positions.size() == jerk_filtered_vels.size());
+
+        // Calculate the time when travel with maximum time
+        std::vector<double> max_times(positions.size(), 0.0);
+        std::vector<double> obs_filtered_times(positions.size(), 0.0);
+        std::vector<double> jerk_filtered_times(positions.size(), 0.0);
+        for(int i=1; i<max_times.size(); ++i)
         {
-            double ds = position[i + 1] - position[i];
-            double dt = 0.0;
-            if (filtered_vels[i] > 0.1)
-                dt = ds / filtered_vels[i];
-            filtered_time[i + 1] = filtered_time[i] + dt;
+            double ds = positions[i] - positions[i-1];
+            double dt_max  = ds/std::max(max_vels[i], 0.1);
+            double dt_obs  = ds/std::max(obs_filtered_vels[i], 0.1);
+            double dt_jerk = ds/std::max(jerk_filtered_vels[i], 0.1);
+            max_times[i]           = max_times[i-1]           + dt_max;
+            obs_filtered_times[i]  = obs_filtered_times[i-1]  + dt_obs;
+            jerk_filtered_times[i] = jerk_filtered_times[i-1] + dt_jerk;
         }
 
         std::ofstream writing_file;
         writing_file.open(filename, std::ios::out);
-        writing_file << "position" << "," << "original_t" << "," << "filtered_t" << "," << "obs_time" <<  "," << "obs_s" << std::endl;
+        writing_file << "position" << ","
+                     << "max_time" << "," << "obs_filtered_time" << "," << "jerk_filtered_time" << ","
+                     << "max_velocity" << "," << "obs_filtered_velocity" << "," << "jerk_filtered_velocity" << ","
+                     << "lp_time" <<  "," << "lp_velocity" << "," << "lp_acceleration" << "," << "lp_jerk" << ","
+                     << "qp_time" <<  "," << "qp_velocity" << "," << "qp_acceleration" << "," << "qp_jerk" << ","
+                     << "nc_time" <<  "," << "nc_velocity" << "," << "nc_acceleration" << "," << "nc_jerk" << ","
+                     << std::endl;
 
-        for(int i=0; i<position.size(); ++i)
+        for(int i=0; i<positions.size(); ++i)
         {
-            if(i<obs.s_.size())
-                writing_file << position[i] << "," << original_time[i] << "," << filtered_time[i] << ","
-                             << obs.t_[i] << "," << obs.s_[i] << std::endl;
-            else
-                writing_file << position[i] << "," << original_time[i] << "," << filtered_time[i] << std::endl;
+            writing_file << positions[i] << ","
+                         << max_times[i] << "," << obs_filtered_times[i] << "," << jerk_filtered_times[i] << ","
+                         << max_vels[i] << "," << obs_filtered_vels[i] << "," << jerk_filtered_vels[i] << ","
+                         << lp_output.time[i] << "," << lp_output.velocity[i] << "," << lp_output.acceleration[i] << "," << lp_output.jerk[i] << ","
+                         << qp_output.time[i] << "," << qp_output.velocity[i] << "," << qp_output.acceleration[i] << "," << qp_output.jerk[i] << ","
+                         << nc_output.time[i] << "," << nc_output.velocity[i] << "," << nc_output.acceleration[i] << "," << nc_output.jerk[i] << ","
+                         << std::endl;
         }
+
         writing_file.close();
     }
 }
