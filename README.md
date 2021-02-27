@@ -7,7 +7,7 @@ This code has been tested on OSX, but the author is working to test the code on 
 - Gurobi 9.0
 - NLOPT
 - Eigen3
-- CMake3.10 or higher
+- CMake3.3 or higher
 
 ## Getting Started
 #### 1. Build the Code
@@ -33,7 +33,6 @@ python3 visualize_experiments.py
 ```asm
 python3 visualize_st.py
 ```
-
 
 ## Result
 - Scenario Normal
