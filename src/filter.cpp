@@ -136,8 +136,8 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
 
     // 2. Find inner arclength
     std::vector<double> arclength_inner;
-    auto it_cutin_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](auto x){ return x >= intersection_arclength[0]; });
-    auto it_cutout_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](auto x){ return x > intersection_arclength.back(); });
+    auto it_cutin_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](double x){ return x >= intersection_arclength[0]; });
+    auto it_cutout_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](double x){ return x > intersection_arclength.back(); });
     for(auto it = it_cutin_arclength; it!=it_cutout_arclength; ++it)
         arclength_inner.push_back(*it);
 
