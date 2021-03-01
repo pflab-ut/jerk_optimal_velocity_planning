@@ -6,6 +6,7 @@ import matplotlib.patches as pat
 from scipy import stats
 import platform
 import os
+import matplotlib
 
 if __name__ == '__main__':
     os.chdir('../')
@@ -21,6 +22,8 @@ if __name__ == '__main__':
     plt.rcParams['ytick.direction'] = 'in' # y axis in
     plt.rcParams['axes.linewidth'] = 1.0 # axis line width
     plt.rcParams['axes.grid'] = True # make grid
+    matplotlib.rcParams['pdf.fonttype'] = 42
+    matplotlib.rcParams['ps.fonttype'] = 42
 
     fig = plt.figure(figsize=(13, 10))
     ax1 = fig.add_subplot(111)

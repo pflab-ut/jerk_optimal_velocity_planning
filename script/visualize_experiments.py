@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import math
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as pat
 from scipy import stats
@@ -18,6 +19,8 @@ if __name__ == '__main__':
     plt.rcParams['ytick.direction'] = 'in' # y axis in
     plt.rcParams['axes.linewidth'] = 1.0 # axis line width
     plt.rcParams['axes.grid'] = True # make grid
+    matplotlib.rcParams['pdf.fonttype'] = 42
+    matplotlib.rcParams['ps.fonttype'] = 42
 
     linewidth_ = 8.5
     fontsize_ = 86
