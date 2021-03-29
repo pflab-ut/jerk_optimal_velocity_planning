@@ -14,6 +14,7 @@ public:
     {
         Normal = 0,
         Accelerate = 1,
+        Stop = 2,
     };
 
     struct ScenarioData
@@ -40,6 +41,7 @@ public:
     void generate(const ScenarioNumber& scenario_num, ScenarioData& scenario_data);
     void generateNormalScenario(ScenarioData& scenario_data);
     void generateAccelerateScenario(ScenarioData& scenario_data);
+    void generateStopScenario(ScenarioData& scenario_data);
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_SCENARIO_GENERATOR_H

@@ -134,33 +134,44 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
         }
     }
 
-    // 2. Find inner arclength
+    // 2. Find arclength_inner and interpolate intersection time
     std::vector<double> arclength_inner;
-    auto it_cutin_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](double x){ return x >= intersection_arclength[0]; });
-    auto it_cutout_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](double x){ return x > intersection_arclength.back(); });
-    for(auto it = it_cutin_arclength; it!=it_cutout_arclength; ++it)
-        arclength_inner.push_back(*it);
-
-    // 3. interpolate intersection time
     std::vector<double> time_inner;
-    if(!LinearInterpolate::interpolate(intersection_arclength, intersection_time, arclength_inner, time_inner))
+    size_t idx_cutout = 0;
+    if(std::fabs(intersection_arclength.front()-intersection_arclength.back())<1e-6)
     {
-        std::cout << "Interpolation Failed" << std::endl;
-        return false;
+        // When the obstacle stops
+        arclength_inner = intersection_arclength;
+        time_inner = intersection_time;
+        auto it_cutout_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](double x){ return x > intersection_arclength.back(); });
+        idx_cutout = std::distance(input_arclength.begin(), it_cutout_arclength);
+    }
+    else
+    {
+        auto it_cutin_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](double x){ return x >= intersection_arclength[0]; });
+        auto it_cutout_arclength = std::find_if(input_arclength.begin(), input_arclength.end(), [&intersection_arclength](double x){ return x > intersection_arclength.back(); });
+        for(auto it = it_cutin_arclength; it!=it_cutout_arclength; ++it)
+            arclength_inner.push_back(*it);
+
+        if(!LinearInterpolate::interpolate(intersection_arclength, intersection_time, arclength_inner, time_inner))
+        {
+            std::cout << "Interpolation Failed" << std::endl;
+            return false;
+        }
+
+        idx_cutout = std::distance(input_arclength.begin(), it_cutout_arclength);
     }
 
 
-    const size_t idx_cutin = std::distance(input_arclength.begin(), it_cutin_arclength);
-    const size_t idx_cutout = std::distance(input_arclength.begin(), it_cutout_arclength);
-
     //4. Set Velocity Limits
-    //double t = input_arclength[1]/std::max(initial_vel, 0.1);
     double t = input_arclength[1]/std::max(max_vels[0], 0.1);
-    double range_s_1 = 3; //temporary
-    double range_s_2 = 1; //temporary
+    double range_s1 = 3.0; //temporary
+    double range_s2 = 1.0; //temporary
     double range_t = 0.5; //temporary
+    size_t interrputed_idx = input_arclength.size()-1;
     for(size_t i=1; i < input_arclength.size()-1; ++i)
     {
+        // Manage Maximum Velocity here
         double v = 0.0;
         if(std::fabs(max_vels[i]<1e-3) || i > idx_cutout)
             v = max_vels[i];
@@ -168,7 +179,7 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
         {
             double ds = input_arclength[i+1] - input_arclength[i];
             double t_tmp = t + ds / max_vels[i];
-            double nearest_s = range_s_1;
+            double nearest_s = range_s1;
             double nearest_t = range_t;
             size_t j_nearest = 0;
 
@@ -185,12 +196,20 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
                 }
             }
 
-            if(nearest_s < range_s_1 && nearest_t < range_t)
+            if(nearest_s < range_s1 && nearest_t < range_t)
             {
-                if(nearest_s < range_s_2)
+                if(nearest_s < range_s2)
                     v = (arclength_inner[j_nearest + 1] - arclength_inner[j_nearest]) / (time_inner[j_nearest + 1] - time_inner[j_nearest]);
                 else
                     v = (arclength_inner.back() - input_arclength[i]) / (time_inner.back() - t);
+
+                // If the velocity is less than 1e-6, then we end the calculation and fill 0 after this idx
+                if(std::fabs(v)<1e-6)
+                {
+                    interrputed_idx = i;
+                    break;
+                }
+
                 t = t + ds / v;
             }
             else
@@ -199,9 +218,12 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
                 t = t_tmp;
             }
         }
+
+        // Fill the calculated Value
         filtered_vels[i] = v;
     }
-    filtered_vels.back() = 0.0;
+    for(int i=interrputed_idx; i<input_arclength.size(); ++i)
+        filtered_vels[i] = 0.0;
 
     return true;
 }

@@ -31,4 +31,7 @@ if __name__ == '__main__':
     plt.ylabel("velocity [m/s]", fontsize=50)
     plt.tick_params(labelsize=50)
     plt.legend(fontsize=35)
-    plt.savefig('/Users/yutaka/Desktop/experiment_filter.eps', bbox_inches="tight", pad_inches=0.05)
+
+    userhome = os.path.expanduser('~')
+    desktop_path = userhome + '/Desktop/'
+    plt.savefig(desktop_path + 'experiment_filter.eps', bbox_inches="tight", pad_inches=0.05)
