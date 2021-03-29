@@ -37,3 +37,6 @@ python3 visualize_st.py
 ## Result
 - Scenario Normal
 <img src="https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/scenario1.png" width=50%>
+
+- Scenario Stop
+<img src="https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/stop_scenario.png" width=50%>
