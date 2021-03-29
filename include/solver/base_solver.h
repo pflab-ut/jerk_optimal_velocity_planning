@@ -29,6 +29,7 @@ public:
     struct OutputInfo
     {
         std::vector<double> time;
+        std::vector<double> position;
         std::vector<double> velocity;
         std::vector<double> acceleration;
         std::vector<double> jerk;

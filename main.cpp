@@ -71,6 +71,7 @@ int main()
     /***************************************************/
     Optimizer lp_optimizer(Optimizer::OptimizerSolver::GUROBI_LP, param);
     BaseSolver::OutputInfo lp_output;
+    lp_output.position = data.positions_;
 
     std::chrono::system_clock::time_point lp_start, lp_end;
     lp_start = std::chrono::system_clock::now();
@@ -93,6 +94,7 @@ int main()
     /***************************************************/
     Optimizer qp_optimizer(Optimizer::OptimizerSolver::GUROBI_QP, param);
     BaseSolver::OutputInfo qp_output;
+    qp_output.position = data.positions_;
 
     std::chrono::system_clock::time_point qp_start, qp_end;
     qp_start = std::chrono::system_clock::now();
@@ -115,6 +117,7 @@ int main()
     /***************************************************/
     Optimizer nc_optimizer(Optimizer::OptimizerSolver::NLOPT_NC, param);
     BaseSolver::OutputInfo nc_output;
+    nc_output.position = data.positions_;
 
     std::chrono::system_clock::time_point nc_start, nc_end;
     nc_start = std::chrono::system_clock::now();

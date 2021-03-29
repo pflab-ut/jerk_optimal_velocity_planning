@@ -62,7 +62,13 @@ void Optimizer::computeTime(const double& ds, BaseSolver::OutputInfo& output)
     output.time.front() = t;
     for(int i=1; i<output.velocity.size(); ++i)
     {
-        t += (ds/std::max(output.velocity[i], 0.1));
+        if(output.velocity[i] < 1e-6)
+        {
+            t += 0.1;
+            output.position[i] = output.position[i-1];
+        }
+        else
+            t += ds/output.velocity[i];
         output.time[i] = t;
     }
 }

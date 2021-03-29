@@ -34,12 +34,27 @@ namespace Utils
         std::vector<double> max_times(positions.size(), 0.0);
         std::vector<double> obs_filtered_times(positions.size(), 0.0);
         std::vector<double> jerk_filtered_times(positions.size(), 0.0);
+        std::vector<double> obs_positions = positions;
+        std::vector<double> jerk_positions = positions;
         for(int i=1; i<max_times.size(); ++i)
         {
             double ds = positions[i] - positions[i-1];
-            double dt_max  = ds/std::max(max_vels[i], 0.1);
-            double dt_obs  = ds/std::max(obs_filtered_vels[i], 0.1);
-            double dt_jerk = ds/std::max(jerk_filtered_vels[i], 0.1);
+            double dt_max  = 0.1;
+            double dt_obs  = 0.1;
+            double dt_jerk = 0.1;
+            if(std::fabs(max_vels[i])>1e-6)
+                dt_max = ds/max_vels[i];
+
+            if(std::fabs(obs_filtered_vels[i])>1e-6)
+                dt_obs  = ds/obs_filtered_vels[i];
+            else
+                obs_positions[i] = obs_positions[i-1];
+
+            if(std::fabs(jerk_filtered_vels[i])>1e-6)
+                dt_jerk = ds/jerk_filtered_vels[i];
+            else
+                jerk_positions[i] = jerk_positions[i-1];
+
             max_times[i]           = max_times[i-1]           + dt_max;
             obs_filtered_times[i]  = obs_filtered_times[i-1]  + dt_obs;
             jerk_filtered_times[i] = jerk_filtered_times[i-1] + dt_jerk;
@@ -47,7 +62,8 @@ namespace Utils
 
         std::ofstream writing_file;
         writing_file.open(filename, std::ios::out);
-        writing_file << "position" << ","
+        writing_file << "position" << "," << "obs_position" << "," << "jerk_position" << ","
+                     << "lp_position" << "," << "qp_position" << "," << "nc_position" << ","
                      << "max_time" << "," << "obs_filtered_time" << "," << "jerk_filtered_time" << ","
                      << "max_velocity" << "," << "obs_filtered_velocity" << "," << "jerk_filtered_velocity" << ","
                      << "lp_time" <<  "," << "lp_velocity" << "," << "lp_acceleration" << "," << "lp_jerk" << ","
@@ -57,7 +73,8 @@ namespace Utils
 
         for(int i=0; i<positions.size(); ++i)
         {
-            writing_file << positions[i] << ","
+            writing_file << positions[i] << "," << obs_positions[i] << "," << jerk_positions[i] << ","
+                         << lp_output.position[i] << "," << qp_output.position[i] << "," << nc_output.position[i] << ","
                          << max_times[i] << "," << obs_filtered_times[i] << "," << jerk_filtered_times[i] << ","
                          << max_vels[i] << "," << obs_filtered_vels[i] << "," << jerk_filtered_vels[i] << ","
                          << lp_output.time[i] << "," << lp_output.velocity[i] << "," << lp_output.acceleration[i] << "," << lp_output.jerk[i] << ","
