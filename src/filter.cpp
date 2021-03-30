@@ -111,9 +111,9 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
     // 1. Compute Intersection Time
     std::vector<double> intersection_time;
     std::vector<double> intersection_arclength;
-    for(int i=0; i<obstacle.s_.size(); ++i)
+    for(int i=0; i<obstacle.extend_s_.size(); ++i)
     {
-        double s_obs = obstacle.s_[i];
+        double s_obs = obstacle.extend_s_[i];
         double min_dist = std::numeric_limits<double>::max();
         double min_id   = -1;
         for(int j=0; j<input_arclength.size(); ++j)
@@ -129,7 +129,7 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
 
         if(min_id > 0 && min_dist<0.2)
         {
-            intersection_time.push_back(obstacle.t_[i]);
+            intersection_time.push_back(obstacle.extend_t_[i]);
             intersection_arclength.push_back(input_arclength[min_id]);
         }
     }
