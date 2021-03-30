@@ -14,7 +14,7 @@ int main()
     const std::string current_dir = std::string(RESULT_DIR);
     std::cout << current_dir << std::endl;
 
-    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Stop;
+    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Wait;
     ScenarioGenerator generator;
 
     ScenarioGenerator::ScenarioData data;
