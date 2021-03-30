@@ -120,7 +120,7 @@ void ScenarioGenerator::generateStopScenario(ScenarioData& scenario_data)
     /***************************************************/
     /******************* Obstacle **********************/
     /***************************************************/
-    const int obs_size = 50;
+    const int obs_size = 100;
     const double obs_v = 0.0;
     const double dt = 0.1;
     const double s0 = 15.0;

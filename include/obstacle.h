@@ -9,7 +9,7 @@ class Obstacle
 public:
     Obstacle() = default;
 
-    Obstacle(const int& N, const double v, const double& dt, const double& s0, const double& t0)
+    Obstacle(const int& N, const double& v, const double& dt, const double& s0, const double& t0) : v_(v)
     {
         s_.resize(N);
         t_.resize(N);
@@ -18,13 +18,14 @@ public:
         t_.front() = t0;
         for(unsigned i=1; i<s_.size(); ++i)
         {
-            s_[i] = s_[i-1] + v * dt;
+            s_[i] = s_[i-1] + v_ * dt;
             t_[i] = t_[i-1] + dt;
         }
     }
 
     std::vector<double> s_;
     std::vector<double> t_;
+    const double v_;
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_OBSTACLE_H
