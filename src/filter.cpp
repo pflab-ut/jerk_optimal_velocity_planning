@@ -206,8 +206,6 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
                 // If the velocity is less than 1e-6, then we move the time till the end of the obstacle's cutout time
                 if(std::fabs(v)<1e-6)
                 {
-                    std::cout << "t: " << t << std::endl;
-                    std::cout << "intersection time: " << intersection_time.back() << std::endl;
                     t = intersection_time.back() + range_t;
                     /*
                     interrputed_idx = i;

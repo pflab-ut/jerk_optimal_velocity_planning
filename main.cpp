@@ -52,9 +52,6 @@ int main()
     double elapsed_filter = std::chrono::duration_cast<std::chrono::nanoseconds>(end_filter-start_filter).count();
     std::cout << "Filter Calulation Time: " << elapsed_filter/1000000 << "[ms]" << std::endl;
 
-    for(int i=0; i<jerk_filtered_vels.size(); ++i)
-        std::cout << "Jerk Filtered Vels[" << i << "]: " << jerk_filtered_vels[i] << std::endl;
-
     /***************************************************/
     /***************** LP Parameter ********************/
     /***************************************************/
