@@ -4,7 +4,7 @@
 
 ## Dependencies. 
 This code has been tested on OSX, but the author is working to test the code on Ubuntu18.04/20.04. External dependencies are 
-- Gurobi 9.0
+- Gurobi 9.1
 - NLOPT
 - Eigen3
 - CMake3.3 or higher
