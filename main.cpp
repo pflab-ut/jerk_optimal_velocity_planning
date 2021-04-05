@@ -14,7 +14,7 @@ int main()
     const std::string current_dir = std::string(RESULT_DIR);
     std::cout << current_dir << std::endl;
 
-    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Wait;
+    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Stop;
     ScenarioGenerator generator;
 
     ScenarioGenerator::ScenarioData data;
@@ -52,6 +52,9 @@ int main()
     double elapsed_filter = std::chrono::duration_cast<std::chrono::nanoseconds>(end_filter-start_filter).count();
     std::cout << "Filter Calulation Time: " << elapsed_filter/1000000 << "[ms]" << std::endl;
 
+    for(int i=0; i<jerk_filtered_vels.size(); ++i)
+        std::cout << "Jerk Filtered Vels[" << i << "]: " << jerk_filtered_vels[i] << std::endl;
+
     /***************************************************/
     /***************** LP Parameter ********************/
     /***************************************************/
@@ -84,7 +87,7 @@ int main()
     if(!lp_result)
     {
         std::cerr << "LP Solver has Error" << std::endl;
-        return 0;
+        return -1;
     }
 
     std::cout << "LP Solver Calculation Time: " << lp_elapsed << "[ms]" << std::endl;
@@ -107,7 +110,7 @@ int main()
     if(!qp_result)
     {
         std::cerr << "QP Solver has Error" << std::endl;
-        return 0;
+        return -1;
     }
 
     std::cout << "QP Solver Calculation Time: " << qp_elapsed << "[ms]" << std::endl;
@@ -130,7 +133,7 @@ int main()
     if(!nc_result)
     {
         std::cerr << "Non-Convex Solver has Error" << std::endl;
-        return 0;
+        return -1;
     }
 
     std::cout << "Non-Convex Solver Calculation Time: " << nc_elapsed << "[ms]" << std::endl;
