@@ -25,10 +25,12 @@ int main()
     /***************************************************/
     Filter vel_filter;
     std::vector<double> obs_filtered_vels;
+    std::vector<double> obs_filtered_times;
 
     std::chrono::system_clock::time_point  start_obs, end_obs;
     start_obs = std::chrono::system_clock::now();
-    vel_filter.obstacleVelocityLimitFilter(data.v0_, data.positions_, data.max_velocities_, data.obs_, obs_filtered_vels);
+    vel_filter.obstacleVelocityLimitFilter(data.v0_, data.positions_, data.max_velocities_, data.obs_,
+                                           obs_filtered_vels, obs_filtered_times);
 
     end_obs = std::chrono::system_clock::now();
     double elapsed_obs = std::chrono::duration_cast<std::chrono::nanoseconds>(end_obs - start_obs).count();
@@ -137,7 +139,7 @@ int main()
 
     std::string filename = current_dir + "/result/optimization_result.csv";
     Utils::outputToFile(filename, data.positions_,
-                        data.max_velocities_, obs_filtered_vels, jerk_filtered_vels,
+                        data.max_velocities_, obs_filtered_vels, obs_filtered_times, jerk_filtered_vels,
                         lp_output, qp_output, nc_output);
 
     return 0;

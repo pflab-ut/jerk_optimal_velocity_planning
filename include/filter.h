@@ -31,7 +31,8 @@ public:
                                      const std::vector<double>& input_arclength,
                                      const std::vector<double>& max_vels,
                                      const Obstacle& obstacle,
-                                     std::vector<double>& filtered_vels);
+                                     std::vector<double>& filtered_vels,
+                                     std::vector<double>& filtered_time);
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_FILTER_H

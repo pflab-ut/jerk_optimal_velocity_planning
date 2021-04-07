@@ -18,6 +18,7 @@ namespace Utils
                       const std::vector<double>& position,
                       const std::vector<double>& max_vels,
                       const std::vector<double>& obs_filtered_vels,
+                      const std::vector<double>& obs_filtered_times,
                       const std::vector<double>& jerk_filtered_vels,
                       const BaseSolver::OutputInfo& lp_output,
                       const BaseSolver::OutputInfo& qp_output,

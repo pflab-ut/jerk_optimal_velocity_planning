@@ -105,9 +105,12 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
                                          const std::vector<double>& input_arclength,
                                          const std::vector<double>& max_vels,
                                          const Obstacle& obstacle,
-                                         std::vector<double>& filtered_vels)
+                                         std::vector<double>& filtered_vels,
+                                         std::vector<double>& filtered_time)
 {
     filtered_vels = max_vels;
+    filtered_time.resize(filtered_vels.size());
+    filtered_time.front() = 0.0;
     // 1. Compute Intersection Time
     std::vector<double> intersection_time;
     std::vector<double> intersection_arclength;
@@ -171,10 +174,20 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
     size_t interrputed_idx = input_arclength.size()-1;
     for(size_t i=1; i < input_arclength.size()-1; ++i)
     {
+        filtered_time[i] = t;
         // Manage Maximum Velocity here
         double v = 0.0;
-        if(std::fabs(max_vels[i]<1e-3) || i > idx_cutout)
+        if(std::fabs(max_vels[i]<1e-3))
+        {
+            interrputed_idx = i;
+            break;
+        }
+        else if(i > idx_cutout - 1)
+        {
             v = max_vels[i];
+            double ds = input_arclength[i+1] - input_arclength[i];
+            t = t + ds/v;
+        }
         else
         {
             double ds = input_arclength[i+1] - input_arclength[i];
@@ -205,17 +218,9 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
 
                 // If the velocity is less than 1e-6, then we move the time till the end of the obstacle's cutout time
                 if(std::fabs(v)<1e-6)
-                {
                     t = intersection_time.back() + range_t;
-                    /*
-                    interrputed_idx = i;
-                    break;
-                    */
-                }
                 else
-                {
                     t = t + ds / v;
-                }
             }
             else
             {
@@ -227,7 +232,12 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
         // Fill the calculated Value
         filtered_vels[i] = v;
     }
-    filtered_vels.back() = 0.0;
+
+    for(int i=interrputed_idx; i<filtered_vels.size(); ++i)
+    {
+        filtered_time[i] = filtered_time[interrputed_idx-1];
+        filtered_vels[i] = 0.0;
+    }
 
     return true;
 }

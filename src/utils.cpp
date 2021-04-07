@@ -21,6 +21,7 @@ namespace Utils
                       const std::vector<double>& positions,
                       const std::vector<double>& max_vels,
                       const std::vector<double>& obs_filtered_vels,
+                      const std::vector<double>& obs_filtered_times,
                       const std::vector<double>& jerk_filtered_vels,
                       const BaseSolver::OutputInfo& lp_output,
                       const BaseSolver::OutputInfo& qp_output,
@@ -32,7 +33,6 @@ namespace Utils
 
         // Calculate the time when travel with maximum time
         std::vector<double> max_times(positions.size(), 0.0);
-        std::vector<double> obs_filtered_times(positions.size(), 0.0);
         std::vector<double> jerk_filtered_times(positions.size(), 0.0);
         std::vector<double> obs_positions = positions;
         std::vector<double> jerk_positions = positions;
@@ -40,15 +40,12 @@ namespace Utils
         {
             double ds = positions[i] - positions[i-1];
             double dt_max  = 0.1;
-            double dt_obs  = 0.1;
             double dt_jerk = 0.1;
             if(std::fabs(max_vels[i])>1e-6)
                 dt_max = ds/max_vels[i];
 
-            if(std::fabs(obs_filtered_vels[i])>1e-6)
-                dt_obs  = ds/obs_filtered_vels[i];
-            else
-                obs_positions[i] = obs_positions[i-1];
+            double dt_obs = obs_filtered_times[i] - obs_filtered_times[i-1];
+            obs_positions[i] = obs_positions[i-1] + obs_filtered_vels[i-1] * dt_obs;
 
             if(std::fabs(jerk_filtered_vels[i])>1e-6)
                 dt_jerk = ds/jerk_filtered_vels[i];
@@ -56,7 +53,6 @@ namespace Utils
                 jerk_positions[i] = jerk_positions[i-1];
 
             max_times[i]           = max_times[i-1]           + dt_max;
-            obs_filtered_times[i]  = obs_filtered_times[i-1]  + dt_obs;
             jerk_filtered_times[i] = jerk_filtered_times[i-1] + dt_jerk;
         }
 
