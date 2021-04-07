@@ -17,7 +17,7 @@ namespace Utils
 {
     void outputToFile(const std::string& filename,
                       const std::vector<double>& position,
-                      const std::vector<double>& max_vels,
+                      const Filter::OutputInfo& max_filtered_data,
                       const Filter::OutputInfo& obs_filtered_data,
                       const std::vector<double>& jerk_filtered_vels,
                       const BaseSolver::OutputInfo& lp_output,

@@ -20,15 +20,23 @@ int main()
     ScenarioGenerator::ScenarioData data;
     generator.generate(num, data);
 
+    // filter
+    Filter vel_filter;
+
+    /***************************************************/
+    /*********** Modify Maximum Velocity ***************/
+    /***************************************************/
+    Filter::OutputInfo modified_data;
+    vel_filter.modifyMaximumVelocity(data.positions_, data.max_velocities_, modified_data);
+
     /***************************************************/
     /********** Obstacle Filter Velocity ***************/
     /***************************************************/
-    Filter vel_filter;
     Filter::OutputInfo obs_filtered_data;
 
     std::chrono::system_clock::time_point  start_obs, end_obs;
     start_obs = std::chrono::system_clock::now();
-    vel_filter.obstacleVelocityLimitFilter(data.v0_, data.positions_, data.max_velocities_, data.obs_, obs_filtered_data);
+    vel_filter.obstacleVelocityLimitFilter(data.v0_, data.positions_, modified_data.velocity, data.obs_, obs_filtered_data);
 
     end_obs = std::chrono::system_clock::now();
     double elapsed_obs = std::chrono::duration_cast<std::chrono::nanoseconds>(end_obs - start_obs).count();
@@ -140,7 +148,7 @@ int main()
 
     std::string filename = current_dir + "/result/optimization_result.csv";
     Utils::outputToFile(filename, data.positions_,
-                        data.max_velocities_, obs_filtered_data, jerk_filtered_vels,
+                        modified_data, obs_filtered_data, jerk_filtered_vels,
                         lp_output, qp_output, nc_output);
 
     return 0;

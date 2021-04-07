@@ -1,5 +1,48 @@
 #include "filter.h"
 
+void Filter::modifyMaximumVelocity(const std::vector<double>& positions,
+                                   const std::vector<double>& original_max_vels,
+                                   Filter::OutputInfo& output_data)
+{
+    output_data.resize(original_max_vels.size());
+    output_data.velocity.front() = original_max_vels.front();
+    output_data.position.front() = 0.0;
+    output_data.time.front()     = 0.0;
+    unsigned int interrupt_id = original_max_vels.size() - 1;
+
+    double t = 0.0;
+    for(unsigned int i=0; i<original_max_vels.size()-1; ++i)
+    {
+        if(std::fabs(original_max_vels[i]) < 1e-6)
+        {
+            interrupt_id = i;
+            break;
+        }
+        else
+        {
+            double dt = (positions[i+1] - positions[i]) / original_max_vels[i];
+            t += dt;
+
+            output_data.position[i] = positions[i];
+            output_data.velocity[i] = original_max_vels[i];
+            output_data.time[i+1] = t;
+        }
+    }
+
+    for(unsigned int i=interrupt_id; i<original_max_vels.size(); ++i)
+    {
+        output_data.position[i] = positions[interrupt_id];
+        output_data.velocity[i] = 0.0;
+
+        if(i<original_max_vels.size()-1)
+            output_data.time[i+1] = output_data.time[i] + 1.0;
+        else
+            output_data.time[i+1] = output_data.time[i];
+    }
+
+    return;
+}
+
 void Filter::smoothVelocity(const double& ds,
                             const double& initial_vel,
                             const double& initial_acc,
@@ -237,6 +280,12 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
     {
         output_data.time[i] = output_data.time[interrputed_idx-1];
         output_data.velocity[i] = 0.0;
+    }
+
+    for(int i=1; i<output_data.position.size(); ++i)
+    {
+        double dt_obs = output_data.time[i] - output_data.time[i-1];
+        output_data.position[i] = output_data.position[i-1] + output_data.velocity[i-1] * dt_obs;
     }
 
     return true;
