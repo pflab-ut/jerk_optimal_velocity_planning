@@ -49,7 +49,7 @@ namespace Utils
 
         std::ofstream writing_file;
         writing_file.open(filename, std::ios::out);
-        writing_file << "position" << "," << "obs_position" << "," << "jerk_position" << ","
+        writing_file << "position" << "," << "max_position" << "," << "obs_position" << "," << "jerk_position" << ","
                      << "lp_position" << "," << "qp_position" << "," << "nc_position" << ","
                      << "max_time" << "," << "obs_filtered_time" << "," << "jerk_filtered_time" << ","
                      << "max_velocity" << "," << "obs_filtered_velocity" << "," << "jerk_filtered_velocity" << ","
@@ -60,7 +60,7 @@ namespace Utils
 
         for(int i=0; i<positions.size(); ++i)
         {
-            writing_file << positions[i] << "," << obs_filtered_data.position[i] << "," << jerk_positions[i] << ","
+            writing_file << positions[i] << "," << max_filtered_data.position[i] << "," << obs_filtered_data.position[i] << "," << jerk_positions[i] << ","
                          << lp_output.position[i] << "," << qp_output.position[i] << "," << nc_output.position[i] << ","
                          << max_filtered_data.time[i] << "," << obs_filtered_data.time[i] << "," << jerk_filtered_times[i] << ","
                          << max_filtered_data.velocity[i] << "," << obs_filtered_data.velocity[i] << "," << jerk_filtered_vels[i] << ","

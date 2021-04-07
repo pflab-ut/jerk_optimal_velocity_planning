@@ -35,7 +35,7 @@ void Filter::modifyMaximumVelocity(const std::vector<double>& positions,
         output_data.velocity[i] = 0.0;
 
         if(i<original_max_vels.size()-1)
-            output_data.time[i+1] = output_data.time[i] + 1.0;
+            output_data.time[i+1] = output_data.time[i] + 0.1;
         else
             output_data.time[i+1] = output_data.time[i];
     }
@@ -278,8 +278,9 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
 
     for(int i=interrputed_idx; i<output_data.velocity.size(); ++i)
     {
-        output_data.time[i] = output_data.time[interrputed_idx-1];
         output_data.velocity[i] = 0.0;
+        if(i<output_data.velocity.size()-1)
+            output_data.time[i+1] = output_data.time[i] + 0.1;
     }
 
     for(int i=1; i<output_data.position.size(); ++i)

@@ -16,6 +16,7 @@ public:
         Accelerate = 1,
         Stop = 2,
         Wait = 3,
+        ZeroMaximum = 4,
     };
 
     struct ScenarioData
@@ -44,6 +45,7 @@ public:
     void generateAccelerateScenario(ScenarioData& scenario_data);
     void generateStopScenario(ScenarioData& scenario_data);
     void generateWaitScenario(ScenarioData& scenario_data);
+    void generateZeroMaximumScenario(ScenarioData& scenario_data);
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_SCENARIO_GENERATOR_H

@@ -29,7 +29,7 @@ if __name__ == '__main__':
     ax1 = fig.add_subplot(111)
 
     ax1.plot(obs_data['obs_time'], obs_data['obs_s'], label="Obstacle", color="black", linewidth=linewidth_, linestyle="dashed")
-    ax1.plot(opt_data['max_time'], opt_data['position'], label="Original", color="black", linewidth=linewidth_)
+    ax1.plot(opt_data['max_time'], opt_data['max_position'], label="Original", color="black", linewidth=linewidth_)
     ax1.plot(opt_data['obs_filtered_time'], opt_data['obs_position'], label="Avoidance", color="purple", linewidth=linewidth_)
     #ax1.plot(opt_data['jerk_filtered_time'], opt_data['position'], label="Jerk Filter", color="orange", linewidth=linewidth_)
     ax1.plot(opt_data['lp_time'], opt_data['lp_position'], label="LP", color="blue", linewidth=linewidth_)
