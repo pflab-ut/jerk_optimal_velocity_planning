@@ -30,7 +30,7 @@ if __name__ == '__main__':
     plt.xlabel("s [m]", fontsize=50)
     plt.ylabel("velocity [m/s]", fontsize=50)
     plt.tick_params(labelsize=50)
-    plt.legend(fontsize=35)
+    plt.legend(fontsize=15)
 
     userhome = os.path.expanduser('~')
     desktop_path = userhome + '/Desktop/'

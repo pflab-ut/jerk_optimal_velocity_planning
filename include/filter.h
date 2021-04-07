@@ -11,6 +11,26 @@
 class Filter
 {
 public:
+    struct OutputInfo
+    {
+        std::vector<double> time;
+        std::vector<double> position;
+        std::vector<double> velocity;
+
+        void reserve(const unsigned int& N)
+        {
+            time.reserve(N);
+            velocity.reserve(N);
+            position.reserve(N);
+        }
+
+        void resize(const unsigned int& N)
+        {
+            time.resize(N);
+            velocity.resize(N);
+            position.reserve(N);
+        }
+    };
     Filter() = default;
     ~Filter() = default;
 
@@ -31,8 +51,7 @@ public:
                                      const std::vector<double>& input_arclength,
                                      const std::vector<double>& max_vels,
                                      const Obstacle& obstacle,
-                                     std::vector<double>& filtered_vels,
-                                     std::vector<double>& filtered_time);
+                                     Filter::OutputInfo& output_data);
 };
 
 #endif //FILTER_POSITION_OPTIMIZATION_FILTER_H

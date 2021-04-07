@@ -20,15 +20,14 @@ namespace Utils
     void outputToFile(const std::string& filename,
                       const std::vector<double>& positions,
                       const std::vector<double>& max_vels,
-                      const std::vector<double>& obs_filtered_vels,
-                      const std::vector<double>& obs_filtered_times,
+                      const Filter::OutputInfo& obs_filtered_data,
                       const std::vector<double>& jerk_filtered_vels,
                       const BaseSolver::OutputInfo& lp_output,
                       const BaseSolver::OutputInfo& qp_output,
                       const BaseSolver::OutputInfo& nc_output)
     {
         assert(positions.size() == max_vels.size());
-        assert(positions.size() == obs_filtered_vels.size());
+        assert(positions.size() == obs_filtered_data.velocity.size());
         assert(positions.size() == jerk_filtered_vels.size());
 
         // Calculate the time when travel with maximum time
@@ -44,8 +43,8 @@ namespace Utils
             if(std::fabs(max_vels[i])>1e-6)
                 dt_max = ds/max_vels[i];
 
-            double dt_obs = obs_filtered_times[i] - obs_filtered_times[i-1];
-            obs_positions[i] = obs_positions[i-1] + obs_filtered_vels[i-1] * dt_obs;
+            double dt_obs = obs_filtered_data.time[i] - obs_filtered_data.time[i-1];
+            obs_positions[i] = obs_positions[i-1] + obs_filtered_data.velocity[i-1] * dt_obs;
 
             if(std::fabs(jerk_filtered_vels[i])>1e-6)
                 dt_jerk = ds/jerk_filtered_vels[i];
@@ -71,8 +70,8 @@ namespace Utils
         {
             writing_file << positions[i] << "," << obs_positions[i] << "," << jerk_positions[i] << ","
                          << lp_output.position[i] << "," << qp_output.position[i] << "," << nc_output.position[i] << ","
-                         << max_times[i] << "," << obs_filtered_times[i] << "," << jerk_filtered_times[i] << ","
-                         << max_vels[i] << "," << obs_filtered_vels[i] << "," << jerk_filtered_vels[i] << ","
+                         << max_times[i] << "," << obs_filtered_data.time[i] << "," << jerk_filtered_times[i] << ","
+                         << max_vels[i] << "," << obs_filtered_data.velocity[i] << "," << jerk_filtered_vels[i] << ","
                          << lp_output.time[i] << "," << lp_output.velocity[i] << "," << lp_output.acceleration[i] << "," << lp_output.jerk[i] << ","
                          << qp_output.time[i] << "," << qp_output.velocity[i] << "," << qp_output.acceleration[i] << "," << qp_output.jerk[i] << ","
                          << nc_output.time[i] << "," << nc_output.velocity[i] << "," << nc_output.acceleration[i] << "," << nc_output.jerk[i] << ","

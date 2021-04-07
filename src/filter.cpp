@@ -105,12 +105,12 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
                                          const std::vector<double>& input_arclength,
                                          const std::vector<double>& max_vels,
                                          const Obstacle& obstacle,
-                                         std::vector<double>& filtered_vels,
-                                         std::vector<double>& filtered_time)
+                                         Filter::OutputInfo& output_data)
 {
-    filtered_vels = max_vels;
-    filtered_time.resize(filtered_vels.size());
-    filtered_time.front() = 0.0;
+    output_data.resize(max_vels.size());
+    output_data.velocity = max_vels;
+    output_data.position.front() = 0.0;
+    output_data.time.front() = 0.0;
     // 1. Compute Intersection Time
     std::vector<double> intersection_time;
     std::vector<double> intersection_arclength;
@@ -174,7 +174,7 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
     size_t interrputed_idx = input_arclength.size()-1;
     for(size_t i=1; i < input_arclength.size()-1; ++i)
     {
-        filtered_time[i] = t;
+        output_data.time[i] = t;
         // Manage Maximum Velocity here
         double v = 0.0;
         if(std::fabs(max_vels[i]<1e-3))
@@ -230,13 +230,13 @@ bool Filter::obstacleVelocityLimitFilter(const double& initial_vel,
         }
 
         // Fill the calculated Value
-        filtered_vels[i] = v;
+        output_data.velocity[i] = v;
     }
 
-    for(int i=interrputed_idx; i<filtered_vels.size(); ++i)
+    for(int i=interrputed_idx; i<output_data.velocity.size(); ++i)
     {
-        filtered_time[i] = filtered_time[interrputed_idx-1];
-        filtered_vels[i] = 0.0;
+        output_data.time[i] = output_data.time[interrputed_idx-1];
+        output_data.velocity[i] = 0.0;
     }
 
     return true;
