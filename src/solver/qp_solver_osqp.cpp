@@ -287,8 +287,6 @@ namespace osqp
         const long constraint_size = 3*N + 1;
         const double amax = param_.max_accel;
         const double amin = param_.min_decel;
-        const double over_v_weight = param_.over_v_weight;
-        const double over_a_weight = param_.over_a_weight;
         const double smooth_weight = param_.smooth_weight;
 
         // Hessian

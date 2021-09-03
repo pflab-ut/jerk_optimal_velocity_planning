@@ -163,6 +163,12 @@ namespace gurobi
             /* Create Environment */
             GRBEnv env = GRBEnv();
             GRBModel model = GRBModel(env);
+            model.set(GRB_DoubleParam_TimeLimit, 100.0);
+            model.set(GRB_DoubleParam_IterationLimit, 40000);
+            model.set(GRB_DoubleParam_FeasibilityTol, 1e-4);
+            model.set(GRB_DoubleParam_BarConvTol, 1e-4);
+            model.set(GRB_DoubleParam_OptimalityTol, 1e-4);
+            model.set(GRB_IntParam_OutputFlag, 0);
 
             int N = max_vels.size();
             /*
@@ -288,6 +294,12 @@ namespace gurobi
             /* Create Environment */
             GRBEnv env = GRBEnv();
             GRBModel model = GRBModel(env);
+            model.set(GRB_DoubleParam_TimeLimit, 100.0);
+            model.set(GRB_DoubleParam_IterationLimit, 40000);
+            model.set(GRB_DoubleParam_FeasibilityTol, 1e-4);
+            model.set(GRB_DoubleParam_BarConvTol, 1e-4);
+            model.set(GRB_DoubleParam_OptimalityTol, 1e-4);
+            model.set(GRB_IntParam_OutputFlag, 0);
 
             int N = max_vels.size();
             const double amax = param_.max_accel;
