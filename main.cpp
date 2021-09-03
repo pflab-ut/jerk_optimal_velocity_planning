@@ -73,7 +73,7 @@ int main()
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
     param.smooth_weight = 500.0;
-    bool is_hard = true;
+    bool is_hard = false;
 
     /***************************************************/
     /*************** LP Optimization *******************/
@@ -125,7 +125,7 @@ int main()
     /***************************************************/
     /************* Non-Convex Optimization *************/
     /***************************************************/
-    Optimizer nc_optimizer(Optimizer::OptimizerSolver::NLOPT_NC, param);
+    Optimizer nc_optimizer(Optimizer::OptimizerSolver::OSQP_LP, param);
     BaseSolver::OutputInfo nc_output;
     nc_output.position = data.positions_;
 
