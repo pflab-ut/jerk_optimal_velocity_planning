@@ -295,7 +295,7 @@ namespace gurobi
             const double smooth_weight = param_.smooth_weight;
 
             /*
-             * x = [b0, b1, ..., bN, |  a0, a1, ..., aN, | delta0, delta1, ..., deltaN] in R^{3N}
+             * x = [b0, b1, ..., bN, |  a0, a1, ..., aN] in R^{2N}
              * b: velocity^2
              * a: acceleration
              * sigma: amin < ai < amax

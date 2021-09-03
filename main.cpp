@@ -73,7 +73,7 @@ int main()
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
     param.smooth_weight = 500.0;
-    bool is_hard = false;
+    bool is_hard = true;
 
     /***************************************************/
     /*************** LP Optimization *******************/
@@ -125,14 +125,14 @@ int main()
     /***************************************************/
     /************* Non-Convex Optimization *************/
     /***************************************************/
-    Optimizer nc_optimizer(Optimizer::OptimizerSolver::OSQP_LP, param);
+    Optimizer nc_optimizer(Optimizer::OptimizerSolver::OSQP_QP, param);
     BaseSolver::OutputInfo nc_output;
     nc_output.position = data.positions_;
 
     std::chrono::system_clock::time_point nc_start, nc_end;
     nc_start = std::chrono::system_clock::now();
 
-    bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
+    bool nc_result = nc_optimizer.solvePseudo(is_hard, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
                                         obs_filtered_data.velocity, nc_output);
 
     nc_end = std::chrono::system_clock::now();

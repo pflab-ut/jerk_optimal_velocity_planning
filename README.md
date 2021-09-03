@@ -7,6 +7,7 @@ This code has been tested on OSX, but the author is working to test the code on 
 - Gurobi 9.1
 - NLOPT
 - Eigen3
+- OSQP
 - CMake3.3 or higher
 
 ## Getting Started

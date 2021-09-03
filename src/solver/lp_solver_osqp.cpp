@@ -73,7 +73,7 @@ namespace osqp
         {
             constraint_matrix(constraint_num, i+2*N) = 1.0;
             lowerBound[constraint_num] = 0.0;
-            upperBound[constraint_num] = 1e10;
+            upperBound[constraint_num] = 1e100;
         }
 
         // 1. Velocity Constraint
@@ -101,7 +101,7 @@ namespace osqp
         {
             constraint_matrix(constraint_num, i+N)   = -ref_vels[i]; // -a[i] * ref_vels[i]
             constraint_matrix(constraint_num, i+1+N) =  ref_vels[i]; // a[i+1] * ref_vels[i]
-            constraint_matrix(constraint_num, i+6*N) = -ds; // pgamma[i]
+            constraint_matrix(constraint_num, i+6*N) = -ds; // -pgamma[i]
             constraint_matrix(constraint_num, i+7*N) =  ds; // mgamma[i]
             lowerBound[constraint_num] = jmin*ds;
             upperBound[constraint_num] = jmax*ds;
@@ -110,8 +110,8 @@ namespace osqp
         //4. Dynamic Constraint
         for(long i=0; i<N-1; ++i, ++constraint_num)
         {
-            constraint_matrix(constraint_num, i+1) = 1.0; // b[i+1]
             constraint_matrix(constraint_num, i) = -1.0; // -b[i]
+            constraint_matrix(constraint_num, i+1) = 1.0; // b[i+1]
             constraint_matrix(constraint_num, i+N) = -2.0*ds; // a[i] * -2.0 * ds
             lowerBound[constraint_num] = 0.0;
             upperBound[constraint_num] = 0.0;
@@ -125,6 +125,8 @@ namespace osqp
         constraint_matrix(constraint_num, N) = 1.0;
         lowerBound[constraint_num] = initial_acc;
         upperBound[constraint_num] = initial_acc;
+        ++constraint_num;
+        assert(constraint_num == constraint_size);
 
         // solve the QP problem
         const auto result = qp_solver_.optimize(hessian, constraint_matrix, gradient, lowerBound, upperBound);
@@ -236,6 +238,8 @@ namespace osqp
         constraint_matrix(constraint_num, N) = 1.0;
         lowerBound[constraint_num] = initial_acc;
         upperBound[constraint_num] = initial_acc;
+        ++constraint_num;
+        assert(constraint_num == constraint_size);
 
         // solve the QP problem
         const auto result = qp_solver_.optimize(hessian, constraint_matrix, gradient, lowerBound, upperBound);
