@@ -276,7 +276,7 @@ namespace osqp
 
         // Create Solver
         osqp::OSQPInterface qp_solver_;
-        qp_solver_.updateMaxIter(20000);
+        qp_solver_.updateMaxIter(40000);
         qp_solver_.updateRhoInterval(0);  // 0 means automatic
         qp_solver_.updateEpsRel(1.0e-4);  // def: 1.0e-4
         qp_solver_.updateEpsAbs(1.0e-8);  // def: 1.0e-4

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 project(filter_position_optimization)
 set(CMAKE_CXX_STNDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 option(CXX "enable C++ compilation" ON)
 if(CXX)
@@ -54,10 +55,3 @@ if(CXX)
 endif()
 
 target_link_libraries(filter_position_opt PUBLIC ${NLOPT_LIBRARIES} ${GUROBI_LIBRARY})
-
-
-
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    include(FeatureSummary)
-    feature_summary(WHAT ALL)
-endif()
