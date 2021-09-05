@@ -14,6 +14,8 @@ add_definitions(-DRESULT_DIR="${CMAKE_SOURCE_DIR}")
 
 include_directories(include)
 
+find_package(Boost REQUIRED)
+
 find_package(GUROBI REQUIRED)
 include_directories(${GUROBI_INCLUDE_DIRS})
 

@@ -59,7 +59,7 @@ int main()
 
     end_filter = std::chrono::system_clock::now();
     double elapsed_filter = std::chrono::duration_cast<std::chrono::nanoseconds>(end_filter-start_filter).count();
-    std::cout << "Filter Calulation Time: " << elapsed_filter/1000000 << "[ms]" << std::endl;
+    std::cout << "Filter Calculation Time: " << elapsed_filter/1000000 << "[ms]" << std::endl;
 
     /***************************************************/
     /***************** LP Parameter ********************/
