@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.3)
 project(filter_position_optimization)
 set(CMAKE_CXX_STNDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++11 -g -D_GLIBCXX_USE_CXX11_ABI=0")
 
 option(CXX "enable C++ compilation" ON)
 if(CXX)
@@ -40,17 +39,11 @@ add_executable(filter_position_opt main.cpp
                                    src/optimizer.cpp
                                    src/scenario_generator.cpp)
 
-if(APPLE)
-    target_link_libraries(filter_position_opt ${NLOPT_LIBRARIES})
-else()
-    target_link_libraries(filter_position_opt "/usr/local/lib/libnlopt.so")
-endif()
-
 if(CXX)
     target_link_libraries(filter_position_opt optimized ${GUROBI_CXX_LIBRARY} debug ${GUROBI_CXX_DEBUG_LIBRARY})
 endif()
 
-target_link_libraries(filter_position_opt ${GUROBI_LIBRARY})
+target_link_libraries(filter_position_opt ${GUROBI_LIBRARY} ${NLOPT_LIBRARIES})
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     include(FeatureSummary)
