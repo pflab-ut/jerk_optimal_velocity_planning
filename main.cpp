@@ -125,7 +125,7 @@ int main()
     /***************************************************/
     /************* Non-Convex Optimization *************/
     /***************************************************/
-    Optimizer nc_optimizer(Optimizer::OptimizerSolver::OSQP_QP, param);
+    Optimizer nc_optimizer(Optimizer::OptimizerSolver::NLOPT_NC, param);
     BaseSolver::OutputInfo nc_output;
     nc_output.position = data.positions_;
 

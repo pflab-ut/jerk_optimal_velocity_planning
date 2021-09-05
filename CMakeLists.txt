@@ -25,6 +25,7 @@ include_directories(${NLOPT_INCLUDE_DIRS})
 
 find_package(osqp REQUIRED)
 get_target_property(osqp_INCLUDE_DIR osqp::osqpstatic INTERFACE_INCLUDE_DIRECTORIES)
+include_directories(${osqp_INCLUDE_DIR})
 
 if(MSVC AND MT)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
@@ -47,17 +48,15 @@ add_executable(filter_position_opt main.cpp
                                    src/optimizer.cpp
                                    src/scenario_generator.cpp)
 
-if(APPLE)
-    target_link_libraries(filter_position_opt ${NLOPT_LIBRARIES})
-else()
-    target_link_libraries(filter_position_opt "/usr/local/lib/libnlopt.so")
-endif()
+target_link_libraries(filter_position_opt PRIVATE osqp::osqp)
 
 if(CXX)
-    target_link_libraries(filter_position_opt optimized ${GUROBI_CXX_LIBRARY} debug ${GUROBI_CXX_DEBUG_LIBRARY})
+    target_link_libraries(filter_position_opt PUBLIC optimized ${GUROBI_CXX_LIBRARY} debug ${GUROBI_CXX_DEBUG_LIBRARY})
 endif()
 
-target_link_libraries(filter_position_opt ${GUROBI_LIBRARY} osqp::osqpstatic)
+target_link_libraries(filter_position_opt PUBLIC ${NLOPT_LIBRARIES} ${GUROBI_LIBRARY})
+
+
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     include(FeatureSummary)

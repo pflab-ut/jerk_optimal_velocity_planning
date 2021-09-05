@@ -8,8 +8,6 @@ find_library(GUROBI_LIBRARY
     HINTS ${GUROBI_DIR} $ENV{GUROBI_HOME}
     PATH_SUFFIXES lib)
 
-message("Gurobi HOME $ENV{GUROBI_LIB}")
-
 if(CXX)
     if(MSVC)
         # determine Visual Studio year
