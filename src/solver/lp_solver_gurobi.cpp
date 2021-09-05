@@ -185,9 +185,9 @@ namespace gurobi
             /*
              * x = [b[0], b[1], ..., b[N] | a[0], a[1], .... a[N]]
              * b[i]: velocity^2
-             * delta: 0 < b[i] < max_vel[i]*max_vel[i]
-             * sigma: amin < a[i] < amax
-             * gamma: jerk_min/ref_vel[i] < pseudo_jerk[i] < jerk_max/ref_vel[i]
+             * 0 < b[i] < max_vel[i]*max_vel[i]
+             * amin < a[i] < amax
+             * jerk_min/ref_vel[i] < pseudo_jerk[i] < jerk_max/ref_vel[i]
              */
             std::vector<GRBVar> b(N);
             std::vector<GRBVar> a(N);

@@ -10,6 +10,7 @@
 #include "nlopt.hpp"
 #include "interpolate.h"
 #include "gurobi_c++.h"
+#include "solver/osqp_interface/osqp_interface.h"
 
 class BaseSolver
 {

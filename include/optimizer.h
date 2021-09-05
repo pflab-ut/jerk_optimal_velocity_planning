@@ -4,6 +4,8 @@
 #include "solver/base_solver.h"
 #include "solver/lp_solver_gurobi.h"
 #include "solver/qp_solver_gurobi.h"
+#include "solver/lp_solver_osqp.h"
+#include "solver/qp_solver_osqp.h"
 #include "solver/nc_solver_nlopt.h"
 #include <memory>
 
@@ -14,7 +16,9 @@ public:
     {
         GUROBI_LP = 0,
         GUROBI_QP = 1,
-        NLOPT_NC = 2,
+        OSQP_LP = 2,
+        OSQP_QP = 3,
+        NLOPT_NC = 4,
     };
 
     Optimizer(const OptimizerSolver& solver_num, const BaseSolver::OptimizerParam& param);
