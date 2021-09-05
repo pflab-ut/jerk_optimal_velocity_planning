@@ -45,9 +45,10 @@ add_executable(filter_position_opt main.cpp
                                    src/solver/nc_solver_nlopt.cpp
                                    src/solver/osqp_interface/csc_matrix_conv.cpp
                                    src/solver/osqp_interface/osqp_interface.cpp
-                                   src/filter.cpp
                                    src/utils.cpp
                                    src/optimizer.cpp
+                                   src/obstacle.cpp
+                                   src/max_velocity_filter.cpp
                                    src/scenario_generator.cpp)
 
 target_link_libraries(filter_position_opt PRIVATE osqp::osqp)

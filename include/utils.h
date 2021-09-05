@@ -11,14 +11,14 @@
 #include <cassert>
 #include "obstacle.h"
 #include "solver/base_solver.h"
-#include "filter.h"
+#include "max_velocity_filter.h"
 
 namespace Utils
 {
     void outputToFile(const std::string& filename,
                       const std::vector<double>& position,
-                      const Filter::OutputInfo& max_filtered_data,
-                      const Filter::OutputInfo& obs_filtered_data,
+                      const MaximumVelocityFilter::OutputInfo& max_filtered_data,
+                      const MaximumVelocityFilter::OutputInfo& obs_filtered_data,
                       const std::vector<double>& jerk_filtered_vels,
                       const BaseSolver::OutputInfo& lp_output,
                       const BaseSolver::OutputInfo& qp_output,

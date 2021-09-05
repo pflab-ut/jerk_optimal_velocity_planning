@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <chrono>
 #include "interpolate.h"
-#include "filter.h"
+#include "max_velocity_filter.h"
 #include "optimizer.h"
 #include "utils.h"
 #include "obstacle.h"
@@ -14,29 +14,60 @@ int main()
     const std::string current_dir = std::string(RESULT_DIR);
     std::cout << current_dir << std::endl;
 
-    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::ZeroMaximum;
+    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Stop;
     ScenarioGenerator generator;
 
     ScenarioGenerator::ScenarioData data;
     generator.generate(num, data);
 
     // filter
-    Filter vel_filter;
+    const double low_vel_threshold = 1e-3;
+    MaximumVelocityFilter vel_filter(low_vel_threshold);
 
     /***************************************************/
     /*********** Modify Maximum Velocity ***************/
     /***************************************************/
-    Filter::OutputInfo modified_data;
+    MaximumVelocityFilter::OutputInfo modified_data;
     vel_filter.modifyMaximumVelocity(data.positions_, data.max_velocities_, modified_data);
 
     /***************************************************/
     /********** Obstacle Filter Velocity ***************/
     /***************************************************/
-    Filter::OutputInfo obs_filtered_data;
+    MaximumVelocityFilter::OutputInfo obs_filtered_data;
 
     std::chrono::system_clock::time_point  start_obs, end_obs;
     start_obs = std::chrono::system_clock::now();
-    vel_filter.obstacleVelocityLimitFilter(data.v0_, data.positions_, modified_data.velocity, data.obs_, obs_filtered_data);
+
+    // Categorize
+    Category obs_category = vel_filter.categorizeObstacles(modified_data.time, modified_data.position, data.obs_);
+
+    // Filter Velocity
+    const double margin_s1 = 3.0;
+    const double margin_s2 = 1.0;
+    if (obs_category == Category::ZeroVelObstacle) {
+        std::cout << "Obstacle with zero velocity" << std::endl;
+        vel_filter.calcZeroVelObsVelocity(
+                modified_data.time, modified_data.position, modified_data.velocity, data.obs_, margin_s1,
+                margin_s2, obs_filtered_data.time, obs_filtered_data.position, obs_filtered_data.velocity);
+    } else if (obs_category == Category::PosInterceptionObstacle) {
+        std::cout << "Obstacle with positive interception" << std::endl;
+        vel_filter.calcPosInterceptObsVelocity(
+                modified_data.time, modified_data.position, modified_data.velocity, data.obs_, margin_s1,
+                margin_s2, obs_filtered_data.time, obs_filtered_data.position, obs_filtered_data.velocity);
+    } else if (obs_category == Category::NegRightInterceptionObstacle) {
+        std::cout << "Obstacle with right negative interception" << std::endl;
+        vel_filter.calcNegRightInterceptObsVelocity(
+                modified_data.time, modified_data.position, modified_data.velocity, data.obs_, margin_s1,
+                margin_s2, obs_filtered_data.time, obs_filtered_data.position, obs_filtered_data.velocity);
+    } else if (obs_category == Category::NegLeftInterceptionObstacle) {
+        std::cout << "Obstacle with left negative interception" << std::endl;
+        vel_filter.calcNegLeftInterceptObsVelocity(
+                modified_data.time, modified_data.position, modified_data.velocity, data.obs_, margin_s1,
+                margin_s2, obs_filtered_data.time, obs_filtered_data.position, obs_filtered_data.velocity);
+    } else {
+        std::cout << "Safe Obstacle" << std::endl;
+        obs_filtered_data = modified_data;
+    }
 
     end_obs = std::chrono::system_clock::now();
     double elapsed_obs = std::chrono::duration_cast<std::chrono::nanoseconds>(end_obs - start_obs).count();
@@ -134,6 +165,10 @@ int main()
 
     bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
                                         obs_filtered_data.velocity, nc_output);
+    /*
+    bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, jerk_filtered_vels,
+                                        jerk_filtered_vels, nc_output);
+                                        */
 
     nc_end = std::chrono::system_clock::now();
     double nc_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(nc_end-nc_start).count();

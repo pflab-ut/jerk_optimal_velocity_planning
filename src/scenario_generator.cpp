@@ -46,12 +46,15 @@ void ScenarioGenerator::generateNormalScenario(ScenarioData &scenario_data)
     /***************************************************/
     /******************* Obstacle **********************/
     /***************************************************/
-    const int obs_size = 50;
     const double obs_v = 2.0;
-    const double dt = 0.1;
-    const double s0 = 10.0;
     const double t0 = 2.0;
-    scenario_data.obs_ = Obstacle(obs_size, obs_v, dt, s0, t0);
+    const double tN = 7.0;
+    const double s0 = 10.0;
+    const double sN = s0 + obs_v * (tN- t0);
+    const double obs_width  = 2.0;
+    const double obs_length = 4.0;
+    const double margin_s = 2.0;
+    scenario_data.obs_ = Obstacle(t0, tN, s0, sN, obs_width, obs_length, margin_s);
 }
 
 void ScenarioGenerator::generateAccelerateScenario(ScenarioData& scenario_data)
@@ -85,12 +88,15 @@ void ScenarioGenerator::generateAccelerateScenario(ScenarioData& scenario_data)
     /***************************************************/
     /******************* Obstacle **********************/
     /***************************************************/
-    const int obs_size = 50;
     const double obs_v = 2.0;
-    const double dt = 0.1;
-    const double s0 = 10.0;
     const double t0 = 2.0;
-    scenario_data.obs_ = Obstacle(obs_size, obs_v, dt, s0, t0);
+    const double tN = 7.0;
+    const double s0 = 10.0;
+    const double sN = s0 + obs_v * (tN- t0);
+    const double obs_width  = 2.0;
+    const double obs_length = 4.0;
+    const double margin_s = 2.0;
+    scenario_data.obs_ = Obstacle(t0, tN, s0, sN, obs_width, obs_length, margin_s);
 }
 
 void ScenarioGenerator::generateStopScenario(ScenarioData& scenario_data)
@@ -124,12 +130,15 @@ void ScenarioGenerator::generateStopScenario(ScenarioData& scenario_data)
     /***************************************************/
     /******************* Obstacle **********************/
     /***************************************************/
-    const int obs_size = 100;
     const double obs_v = 0.0;
-    const double dt = 0.1;
-    const double s0 = 15.0;
     const double t0 = 3.0;
-    scenario_data.obs_ = Obstacle(obs_size, obs_v, dt, s0, t0);
+    const double tN = 13.0;
+    const double s0 = 17.0;
+    const double sN = s0 + obs_v * (tN- t0);
+    const double obs_width  = 2.0;
+    const double obs_length = 4.0;
+    const double margin_s = 2.0;
+    scenario_data.obs_ = Obstacle(t0, tN, s0, sN, obs_width, obs_length, margin_s);
 }
 
 void ScenarioGenerator::generateWaitScenario(ScenarioData& scenario_data)
@@ -163,12 +172,15 @@ void ScenarioGenerator::generateWaitScenario(ScenarioData& scenario_data)
     /***************************************************/
     /******************* Obstacle **********************/
     /***************************************************/
-    const int obs_size = 100;
     const double obs_v = 1.0;
-    const double dt = 0.1;
-    const double s0 = 15.0;
     const double t0 = 7.0;
-    scenario_data.obs_ = Obstacle(obs_size, obs_v, dt, s0, t0);
+    const double tN = 17.0;
+    const double s0 = 15.0;
+    const double sN = s0 + obs_v * (tN- t0);
+    const double obs_width  = 2.0;
+    const double obs_length = 4.0;
+    const double margin_s = 2.0;
+    scenario_data.obs_ = Obstacle(t0, tN, s0, sN, obs_width, obs_length, margin_s);
 }
 
 void ScenarioGenerator::generateZeroMaximumScenario(ScenarioData &scenario_data)
@@ -205,10 +217,13 @@ void ScenarioGenerator::generateZeroMaximumScenario(ScenarioData &scenario_data)
     /***************************************************/
     /******************* Obstacle **********************/
     /***************************************************/
-    const int obs_size = 50;
-    const double obs_v = 2.0;
-    const double dt = 0.1;
-    const double s0 = 20.0;
+    const double obs_v = 0.0;
     const double t0 = 2.0;
-    scenario_data.obs_ = Obstacle(obs_size, obs_v, dt, s0, t0);
+    const double tN = 7.0;
+    const double s0 = 20.0;
+    const double sN = s0 + obs_v * (tN- t0);
+    const double obs_width  = 2.0;
+    const double obs_length = 4.0;
+    const double margin_s = 2.0;
+    scenario_data.obs_ = Obstacle(t0, tN, s0, sN, obs_width, obs_length, margin_s);
 }

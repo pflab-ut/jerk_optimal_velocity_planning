@@ -11,16 +11,15 @@ namespace Utils
         writing_file.open(filename, std::ios::out);
         writing_file << "obs_time" <<  "," << "obs_s" << std::endl;
 
-        for(int i=0; i<obs.s_.size(); ++i)
-            writing_file << obs.t_[i] << "," << obs.s_[i] << std::endl;
-
+        writing_file << obs.t_.first  << "," << obs.s_.first  << std::endl;
+        writing_file << obs.t_.second << "," << obs.s_.second << std::endl;
         writing_file.close();
     }
 
     void outputToFile(const std::string& filename,
                       const std::vector<double>& positions,
-                      const Filter::OutputInfo& max_filtered_data,
-                      const Filter::OutputInfo& obs_filtered_data,
+                      const MaximumVelocityFilter::OutputInfo& max_filtered_data,
+                      const MaximumVelocityFilter::OutputInfo& obs_filtered_data,
                       const std::vector<double>& jerk_filtered_vels,
                       const BaseSolver::OutputInfo& lp_output,
                       const BaseSolver::OutputInfo& qp_output,
