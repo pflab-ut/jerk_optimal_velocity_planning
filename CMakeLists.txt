@@ -26,9 +26,6 @@ include_directories(${NLOPT_INCLUDE_DIRS})
 find_package(osqp REQUIRED)
 get_target_property(osqp_INCLUDE_DIR osqp::osqpstatic INTERFACE_INCLUDE_DIRECTORIES)
 
-# OSQP
-find_package(OsqpEigen REQUIRED)
-
 if(MSVC AND MT)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
