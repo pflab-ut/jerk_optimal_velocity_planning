@@ -103,7 +103,7 @@ int main()
     param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
-    param.smooth_weight = 1.0;
+    param.smooth_weight = 20.0;
     bool is_hard = true;
 
     /***************************************************/
@@ -156,19 +156,19 @@ int main()
     /***************************************************/
     /************* Non-Convex Optimization *************/
     /***************************************************/
-    Optimizer nc_optimizer(Optimizer::OptimizerSolver::OSQP_LP, param);
+    Optimizer nc_optimizer(Optimizer::OptimizerSolver::NLOPT_NC, param);
     BaseSolver::OutputInfo nc_output;
     nc_output.position = data.positions_;
 
     std::chrono::system_clock::time_point nc_start, nc_end;
     nc_start = std::chrono::system_clock::now();
 
-    /*
     bool nc_result = nc_optimizer.solve(true, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
                                         obs_filtered_data.velocity, nc_output);
-                                        */
+    /*
     bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, jerk_filtered_vels,
                                         jerk_filtered_vels, nc_output);
+                                        */
 
     nc_end = std::chrono::system_clock::now();
     double nc_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(nc_end-nc_start).count();
