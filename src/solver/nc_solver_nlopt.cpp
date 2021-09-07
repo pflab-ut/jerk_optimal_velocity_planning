@@ -21,8 +21,8 @@ namespace nlopt
         double tol = 1e-5;
 
         assert(ref_vels.size()==max_vels.size());
-        int N = ref_vels.size();
-        int dim = 2*N;
+        int N = static_cast<int>(ref_vels.size());
+        int dim = 5*N;
         const double amax = param_.max_accel;
         const double amin = param_.min_decel;
         const double jmax = param_.max_jerk;
@@ -32,7 +32,7 @@ namespace nlopt
         const double over_a_weight = param_.over_a_weight;
 
         nlopt::opt opt(nlopt::LD_SLSQP, dim); //algorithm and dimension of the problem
-        opt.set_maxeval(400000);
+        //opt.set_maxeval(400000);
 
         //  1. Create Input Constraint
         std::vector<double> lb(dim); // Lower Bound

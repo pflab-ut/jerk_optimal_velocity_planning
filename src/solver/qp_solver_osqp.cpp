@@ -49,7 +49,10 @@ namespace osqp
         // Gradient
         std::vector<double> gradient(var_size, 0.0);
         for(long i=0; i<N; ++i)
-            gradient[i] = -1.0;
+        {
+            const double v_max = std::max(max_vels.at(i), 0.1);
+            gradient[i] = -1.0/(v_max*v_max);
+        }
 
         // Constraint Matrix
         Eigen::MatrixXd constraint_matrix = Eigen::MatrixXd::Zero(constraint_size, var_size);
@@ -190,7 +193,10 @@ namespace osqp
         // Gradient
         std::vector<double> gradient(var_size, 0.0);
         for(long i=0; i<N; ++i)
-            gradient[i] = -1.0;
+        {
+            const double v_max = std::max(max_vels.at(i), 0.1);
+            gradient[i] = -1.0/(v_max*v_max);
+        }
 
         // Constraint Matrix
         Eigen::MatrixXd constraint_matrix = Eigen::MatrixXd::Zero(constraint_size, var_size);
@@ -302,7 +308,10 @@ namespace osqp
         // Gradient
         std::vector<double> gradient(var_size, 0.0);
         for(long i=0; i<N; ++i)
-            gradient[i] = -1.0;
+        {
+            const double v_max = std::max(max_vels.at(i), 0.1);
+            gradient[i] = -1.0/(v_max*v_max);
+        }
 
         // Constraint Matrix
         Eigen::MatrixXd constraint_matrix = Eigen::MatrixXd::Zero(constraint_size, var_size);

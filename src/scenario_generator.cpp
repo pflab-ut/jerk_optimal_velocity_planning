@@ -26,6 +26,8 @@ void ScenarioGenerator::generateNormalScenario(ScenarioData &scenario_data)
     scenario_data.ds_       = 0.1;
     scenario_data.max_acc_  = 1.0;
     scenario_data.max_jerk_ = 0.8;
+    scenario_data.min_acc_  = -1.0;
+    scenario_data.min_jerk_ = -0.8;
 
     scenario_data.positions_      = std::vector<double>(scenario_data.N_, 0.0);
     scenario_data.max_velocities_ = std::vector<double>(scenario_data.N_, 0.0);
@@ -68,6 +70,8 @@ void ScenarioGenerator::generateAccelerateScenario(ScenarioData& scenario_data)
     scenario_data.ds_       = 0.1;
     scenario_data.max_acc_  = 1.0;
     scenario_data.max_jerk_ = 0.8;
+    scenario_data.min_acc_  = -1.0;
+    scenario_data.min_jerk_ = -0.8;
 
     scenario_data.positions_      = std::vector<double>(scenario_data.N_, 0.0);
     scenario_data.max_velocities_ = std::vector<double>(scenario_data.N_, 0.0);
@@ -110,6 +114,8 @@ void ScenarioGenerator::generateStopScenario(ScenarioData& scenario_data)
     scenario_data.ds_       = 0.1;
     scenario_data.max_acc_  = 1.0;
     scenario_data.max_jerk_ = 0.8;
+    scenario_data.min_acc_  = -1.0;
+    scenario_data.min_jerk_ = -0.8;
 
     scenario_data.positions_      = std::vector<double>(scenario_data.N_, 0.0);
     scenario_data.max_velocities_ = std::vector<double>(scenario_data.N_, 0.0);
@@ -152,6 +158,8 @@ void ScenarioGenerator::generateWaitScenario(ScenarioData& scenario_data)
     scenario_data.ds_       = 0.1;
     scenario_data.max_acc_  = 1.0;
     scenario_data.max_jerk_ = 0.8;
+    scenario_data.min_acc_  = -1.0;
+    scenario_data.min_jerk_ = -0.8;
 
     scenario_data.positions_      = std::vector<double>(scenario_data.N_, 0.0);
     scenario_data.max_velocities_ = std::vector<double>(scenario_data.N_, 0.0);
@@ -194,6 +202,8 @@ void ScenarioGenerator::generateZeroMaximumScenario(ScenarioData &scenario_data)
     scenario_data.ds_       = 0.1;
     scenario_data.max_acc_  = 1.0;
     scenario_data.max_jerk_ = 0.8;
+    scenario_data.min_acc_  = -1.0;
+    scenario_data.min_jerk_ = -0.8;
 
     scenario_data.positions_      = std::vector<double>(scenario_data.N_, 0.0);
     scenario_data.max_velocities_ = std::vector<double>(scenario_data.N_, 0.0);

@@ -48,79 +48,105 @@ void MaximumVelocityFilter::modifyMaximumVelocity(const std::vector<double>& pos
     return;
 }
 
-void MaximumVelocityFilter::smoothVelocity(const double& ds,
-                                           const double& initial_vel,
-                                           const double& initial_acc,
-                                           const double& max_acc,
-                                           const double& jerk_acc,
+void MaximumVelocityFilter::forwardJerkFilter(const double v0, const double a0, const double a_max, const double j_max,
+                                              const double ds,
+                                              const std::vector<double>& original_vel,
+                                              std::vector<double>& filtered_vel,
+                                              std::vector<double>& filtered_acc)
+{
+    auto applyLimits = [&original_vel](double & v, double & a, size_t i) {
+        double v_lim = original_vel.at(i);
+        static constexpr double ep = 1.0e-5;
+        if (v > v_lim + ep) {
+            v = v_lim;
+            a = 0.0;
+        }
+
+        if (v < 0.0) {
+            v = a = 0.0;
+        }
+    };
+
+    filtered_vel.resize(original_vel.size());
+    filtered_acc.resize(original_vel.size());
+
+    // Step1. Filter Initial Velocity and Acceleration
+    double current_vel = v0;
+    double current_acc = a0;
+    applyLimits(current_vel, current_acc, 0);
+
+    filtered_vel.front() = current_vel;
+    filtered_acc.front() = current_acc;
+    for (size_t i = 1; i < filtered_vel.size(); ++i) {
+        const double max_dt = std::pow(6.0 * ds / j_max, 1.0 / 3.0);  // assuming v0 = a0 = 0.
+        const double dt = std::min(ds / std::max(current_vel, 1.0e-6), max_dt);
+
+        if (current_acc + j_max * dt >= a_max) {
+            const double tmp_jerk = std::min((a_max - current_acc) / dt, j_max);
+            current_vel = current_vel + current_acc * dt + 0.5 * tmp_jerk * dt * dt;
+            current_acc = a_max;
+        } else {
+            current_vel = current_vel + current_acc * dt + 0.5 * j_max * dt * dt;
+            current_acc = current_acc + j_max * dt;
+        }
+        applyLimits(current_vel, current_acc, i);
+        filtered_vel.at(i) = current_vel;
+        filtered_acc.at(i) = current_acc;
+    }
+}
+
+void MaximumVelocityFilter::backwardJerkFilter(const double v0, const double a0, const double a_min, const double j_min,
+                                               const double ds, const std::vector<double> &original_vel,
+                                               std::vector<double> &filtered_vel, std::vector<double> &filtered_acc)
+{
+    auto input_rev = original_vel;
+    std::reverse(input_rev.begin(), input_rev.end());
+    forwardJerkFilter(v0, std::fabs(a0), std::fabs(a_min), std::fabs(j_min), ds, input_rev, filtered_vel, filtered_acc);
+    std::reverse(filtered_vel.begin(), filtered_vel.end());
+    std::reverse(filtered_acc.begin(), filtered_acc.end());
+    for (double & a : filtered_acc) {
+        a *= -1.0;  // Deceleration
+    }
+}
+
+void MaximumVelocityFilter::mergeFilteredVelocity(const std::vector<double> &forward_vels,
+                                                  const std::vector<double> &backeard_vels,
+                                                  std::vector<double> &merged_vels)
+{
+    double ep = 1e-5;
+    double v0 = forward_vels.front();
+
+    merged_vels.resize(forward_vels.size());
+
+    size_t i = 0;
+    if(backeard_vels.front() < v0 - 1e-6)
+    {
+        while(backeard_vels[i] < forward_vels[i] && i < merged_vels.size())
+        {
+            merged_vels[i] = forward_vels[i];
+            ++i;
+        }
+    }
+
+    for(; i<merged_vels.size(); ++i)
+        merged_vels[i] = (forward_vels[i] < backeard_vels[i]) ? forward_vels[i] : backeard_vels[i];
+}
+
+void MaximumVelocityFilter::smoothVelocity(const double& ds, const double& v0, const double& a0,
+                                           const double& a_max, const double& j_max,
+                                           const double& a_min, const double& j_min,
                                            const std::vector<double>& original_vel,
                                            std::vector<double>& filtered_vel,
                                            std::vector<double>& filtered_acc)
 {
-    filtered_vel = std::vector<double>(original_vel.size());
-    filtered_acc = std::vector<double>(original_vel.size());
-    filtered_vel.front() = initial_vel;
-    filtered_acc.front() = initial_acc;
-    double current_vel = initial_vel;
-    double current_acc = initial_acc;
+    std::vector<double> forward_vels;
+    std::vector<double> forward_accs;
+    forwardJerkFilter(v0, a0, a_max, j_max, ds, original_vel, forward_vels, forward_accs);
 
-    // Forward Filter
-    for(unsigned int i=1; i<original_vel.size(); ++i)
-    {
-        double dt = 0.0;
-        if(std::fabs(current_vel)<1e-6)
-            dt = sqrt(2*ds/max_acc);
-        else
-            dt = ds/current_vel;
+    std::vector<double> backward_vels;
+    std::vector<double> backward_accs;
+    backwardJerkFilter(v0, a0, a_min, j_min, ds, original_vel, backward_vels, backward_accs);
 
-        current_acc = std::min(current_acc + jerk_acc*dt, max_acc);
-        double next_vel = current_vel + current_acc * dt;
-        if(next_vel > original_vel[i])
-        {
-            current_vel = original_vel[i];
-            current_acc = 0.0;
-        }
-        else
-            current_vel = next_vel;
-
-        // Store Filtered Velocity
-        filtered_vel[i] = current_vel;
-        filtered_acc[i] = current_acc;
-    }
-
-    std::vector<double> forward_vels = filtered_vel;
-
-    //3. Backward Filter
-    filtered_vel.back() = original_vel.back();
-    filtered_acc.back() = 0.0;
-    current_vel = original_vel.back();
-    current_acc = 0.0;
-    for(int i=static_cast<int>(original_vel.size())-2; i>=0; --i)
-    {
-        double dt;
-        if(std::fabs(current_vel)<1e-4)
-            dt = sqrt(2*ds/max_acc);
-        else
-            dt = ds/current_vel;
-
-        current_acc = std::min(current_acc + jerk_acc*dt, max_acc);
-        double next_vel = current_vel + current_acc * dt;
-        if(next_vel > filtered_vel[i])
-        {
-            current_vel = filtered_vel[i];
-            current_acc = 0.0;
-        }
-        else
-        {
-            current_vel = next_vel;
-            filtered_acc[i] = -current_acc;
-        }
-
-        // Store Filtered Velocity
-        filtered_vel[i] = current_vel;
-    }
-
-    std::vector<double> backward_vels = filtered_vel;
     std::vector<double> merged_vels;
     mergeFilteredVelocity(forward_vels, backward_vels, merged_vels);
     filtered_vel = merged_vels;
@@ -749,25 +775,4 @@ void MaximumVelocityFilter::calcNegLeftInterceptObsVelocity(
             opt_positions, opt_vels);
 }
 
-void MaximumVelocityFilter::mergeFilteredVelocity(const std::vector<double> &forward_vels,
-                                                  const std::vector<double> &backeard_vels,
-                                                  std::vector<double> &merged_vels)
-{
-    double ep = 1e-5;
-    double v0 = forward_vels.front();
 
-    merged_vels.resize(forward_vels.size());
-
-    size_t i = 0;
-    if(backeard_vels.front() < v0 - 1e-6)
-    {
-        while(backeard_vels[i] < forward_vels[i] && i < merged_vels.size())
-        {
-            merged_vels[i] = forward_vels[i];
-            ++i;
-        }
-    }
-
-    for(; i<merged_vels.size(); ++i)
-        merged_vels[i] = (forward_vels[i] < backeard_vels[i]) ? forward_vels[i] : backeard_vels[i];
-}

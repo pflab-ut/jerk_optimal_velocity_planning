@@ -80,9 +80,12 @@ namespace gurobi
             /**************************************************************/
             GRBLinExpr  Jl = 0.0;
             for(int i=0; i<N; ++i)
-                Jl += -b[i] + over_v_weight*(pdelta[i]+mdelta[i])
-                            + over_a_weight*(psigma[i]+msigma[i])
-                            + over_j_weight*(pgamma[i]+mgamma[i]);
+            {
+                double vmax = std::max(max_vels[i], 0.1);
+                Jl += -b[i]/(vmax*vmax) + over_v_weight*(pdelta[i]+mdelta[i])
+                      + over_a_weight*(psigma[i]+msigma[i])
+                      + over_j_weight*(pgamma[i]+mgamma[i]);
+            }
 
             model.setObjective(Jl, GRB_MINIMIZE);
 
@@ -114,8 +117,9 @@ namespace gurobi
             }
 
             // Initial Condition
-            model.addConstr(b[0]==initial_vel*initial_vel, "v0");
-            model.addConstr(a[0]==initial_acc, "a0");
+            model.addConstr(b[0]==initial_vel*initial_vel, "initial_velocity");
+            model.addConstr(a[0]==initial_acc, "initial_acc");
+            model.addConstr(a[N-1]==0.0, "terminal_acc");
 
             /**************************************************************/
             /**************************************************************/
@@ -198,6 +202,7 @@ namespace gurobi
                 b[i] = model.addVar(0.0, max_vels[i]*max_vels[i], 0.0, GRB_CONTINUOUS, "b"+std::to_string(i));
                 a[i] = model.addVar(amin, amax, 0.0, GRB_CONTINUOUS, "a"+std::to_string(i));
             }
+            a[N-1] = model.addVar(0.0, 0.0, 0.0, GRB_CONTINUOUS, "a"+std::to_string(N-1));
 
             /**************************************************************/
             /**************************************************************/
@@ -206,7 +211,10 @@ namespace gurobi
             /**************************************************************/
             GRBLinExpr  Jl = 0.0;
             for(int i=0; i<N; ++i)
-                Jl += -b[i];
+            {
+                double vmax = std::max(max_vels[i], 0.1);
+                Jl += -b[i]/(vmax*vmax);
+            }
 
             model.setObjective(Jl, GRB_MINIMIZE);
 

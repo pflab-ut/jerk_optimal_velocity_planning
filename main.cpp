@@ -14,7 +14,7 @@ int main()
     const std::string current_dir = std::string(RESULT_DIR);
     std::cout << current_dir << std::endl;
 
-    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Stop;
+    ScenarioGenerator::ScenarioNumber num = ScenarioGenerator::Normal;
     ScenarioGenerator generator;
 
     ScenarioGenerator::ScenarioData data;
@@ -85,8 +85,8 @@ int main()
     std::chrono::system_clock::time_point  start_filter, end_filter;
     start_filter = std::chrono::system_clock::now();
 
-    vel_filter.smoothVelocity(data.ds_, data.v0_, data.a0_, data.max_acc_, data.max_jerk_, obs_filtered_data.velocity,
-                              jerk_filtered_vels, jerk_filtered_accs);
+    vel_filter.smoothVelocity(data.ds_, data.v0_, data.a0_, data.max_acc_, data.max_jerk_, data.min_acc_, data.min_jerk_,
+                              obs_filtered_data.velocity, jerk_filtered_vels, jerk_filtered_accs);
 
     end_filter = std::chrono::system_clock::now();
     double elapsed_filter = std::chrono::duration_cast<std::chrono::nanoseconds>(end_filter-start_filter).count();
@@ -103,7 +103,7 @@ int main()
     param.over_j_weight = 1000;
     param.over_a_weight = 1000;
     param.over_v_weight = 1000;
-    param.smooth_weight = 500.0;
+    param.smooth_weight = 1.0;
     bool is_hard = true;
 
     /***************************************************/
@@ -156,19 +156,19 @@ int main()
     /***************************************************/
     /************* Non-Convex Optimization *************/
     /***************************************************/
-    Optimizer nc_optimizer(Optimizer::OptimizerSolver::NLOPT_NC, param);
+    Optimizer nc_optimizer(Optimizer::OptimizerSolver::OSQP_LP, param);
     BaseSolver::OutputInfo nc_output;
     nc_output.position = data.positions_;
 
     std::chrono::system_clock::time_point nc_start, nc_end;
     nc_start = std::chrono::system_clock::now();
 
-    bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
-                                        obs_filtered_data.velocity, nc_output);
     /*
+    bool nc_result = nc_optimizer.solve(true, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
+                                        obs_filtered_data.velocity, nc_output);
+                                        */
     bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, jerk_filtered_vels,
                                         jerk_filtered_vels, nc_output);
-                                        */
 
     nc_end = std::chrono::system_clock::now();
     double nc_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(nc_end-nc_start).count();

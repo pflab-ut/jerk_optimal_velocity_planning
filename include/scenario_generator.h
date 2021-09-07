@@ -28,6 +28,8 @@ public:
         double ds_;
         double max_acc_;
         double max_jerk_;
+        double min_acc_;
+        double min_jerk_;
 
         std::vector<double> positions_;
         std::vector<double> max_velocities_;

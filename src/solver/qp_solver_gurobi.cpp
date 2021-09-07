@@ -65,7 +65,8 @@ namespace gurobi
             GRBQuadExpr Jq = 0.0;
             for(int i=0; i<N; ++i)
             {
-                Jl += -b[i];
+                double vmax = std::max(max_vels[i], 0.1);
+                Jl += -b[i]/(vmax*vmax);
                 Jq += over_v_weight*delta[i]*delta[i]+over_a_weight*sigma[i]*sigma[i]+over_j_weight*gamma[i]*gamma[i];
             }
 
@@ -99,8 +100,9 @@ namespace gurobi
             }
 
             // Initial Condition
-            model.addConstr(b[0]==initial_vel*initial_vel, "v0");
-            model.addConstr(a[0]==initial_acc, "a0");
+            model.addConstr(b[0]==initial_vel*initial_vel, "initial_vel");
+            model.addConstr(a[0]==initial_acc, "initial_acc");
+            model.addConstr(a[N-1]==0, "terminal_acc");
 
             /**************************************************************/
             /**************************************************************/
@@ -207,8 +209,9 @@ namespace gurobi
             GRBQuadExpr Jq = 0.0;
             for(int i=0; i<N; ++i)
             {
-                // |vmax^2 - b| -> minimize (-bi)
-                Jl += -b[i];
+                // |vmax^2 - b|/(vmax*vmax) -> minimize (-bi)/vmax^2
+                double vmax = std::max(max_vels[i], 0.1);
+                Jl += -b[i]/(vmax*vmax);
 
                 // Weight for soft constraint
                 Jq += over_v_weight*delta[i]*delta[i] + over_a_weight*sigma[i]*sigma[i];
@@ -241,8 +244,9 @@ namespace gurobi
                 model.addConstr((b[i+1]-b[i])/ds == 2*a[i], "equality"+std::to_string(i));
 
             // Initial Condition
-            model.addConstr(b[0]==initial_vel*initial_vel, "v0");
-            model.addConstr(a[0]==initial_acc, "a0");
+            model.addConstr(b[0]==initial_vel*initial_vel, "initial_vel");
+            model.addConstr(a[0]==initial_acc, "initial_acc");
+            model.addConstr(a[N-1]==0.0, "terminal_acc");
 
             /**************************************************************/
             /**************************************************************/
@@ -321,6 +325,7 @@ namespace gurobi
                 b[i] = model.addVar(0.0, max_vels[i]*max_vels[i], 0.0, GRB_CONTINUOUS, "b"+std::to_string(i));
                 a[i] = model.addVar(amin, amax, 0.0, GRB_CONTINUOUS, "a"+std::to_string(i));
             }
+            a[N-1] = model.addVar(0.0, 0.0, 0.0, GRB_CONTINUOUS, "a"+std::to_string(N-1));
 
             /**************************************************************/
             /**************************************************************/
@@ -331,8 +336,9 @@ namespace gurobi
             GRBQuadExpr Jq = 0.0;
             for(int i=0; i<N; ++i)
             {
-                // |vmax^2 - b| -> minimize (-bi)
-                Jl += -b[i];
+                // |vmax^2 - b|/(vmax*vmax) -> minimize (-bi)/vmax^2
+                double vmax = std::max(max_vels[i], 0.1);
+                Jl += -b[i]/(vmax*vmax);
 
                 // pseudo jerk: d(ai)/ds -> minimize weight * (a1 - a0)^2
                 if(i<N-1)

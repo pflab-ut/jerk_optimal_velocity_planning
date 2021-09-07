@@ -57,14 +57,24 @@ public:
                                const std::vector<double>& original_max_vels,
                                MaximumVelocityFilter::OutputInfo& output_data);
 
-    void smoothVelocity(const double& ds,
-                        const double& initial_vel,
-                        const double& initial_acc,
-                        const double& max_acc,
-                        const double& jerk_acc,
+    void smoothVelocity(const double& ds, const double& v0, const double& a0,
+                        const double& a_max, const double& j_max,
+                        const double& a_min, const double& j_min,
                         const std::vector<double>& original_vel,
                         std::vector<double>& filtered_vel,
                         std::vector<double>& filtered_acc);
+
+    void forwardJerkFilter(const double v0, const double a0, const double a_max, const double j_max,
+                           const double ds,
+                           const std::vector<double>& original_vel,
+                           std::vector<double>& filtered_vel,
+                           std::vector<double>& filtered_acc);
+
+    void backwardJerkFilter(const double v0, const double a0, const double a_min, const double j_min,
+                            const double ds,
+                            const std::vector<double>& original_vel,
+                            std::vector<double>& filtered_vel,
+                            std::vector<double>& filtered_acc);
 
     Category categorizeObstacles(
             const std::vector<double> & times, const std::vector<double> & positions,
