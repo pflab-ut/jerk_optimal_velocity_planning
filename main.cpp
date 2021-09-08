@@ -163,7 +163,7 @@ int main()
     std::chrono::system_clock::time_point nc_start, nc_end;
     nc_start = std::chrono::system_clock::now();
 
-    bool nc_result = nc_optimizer.solve(true, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
+    bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, obs_filtered_data.velocity,
                                         obs_filtered_data.velocity, nc_output);
     /*
     bool nc_result = nc_optimizer.solve(is_hard, data.v0_, data.a0_, data.ds_, jerk_filtered_vels,

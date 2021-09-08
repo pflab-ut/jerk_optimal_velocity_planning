@@ -23,14 +23,14 @@ if __name__ == '__main__':
     matplotlib.rcParams['ps.fonttype'] = 42
 
     linewidth_ = 2.5
-    fig = plt.figure(figsize=(14, 10))
+    fig = plt.figure(figsize=(7, 5))
     plt.plot(data['position'], data['max_velocity'], label="Maximum Velocity", color="black", linewidth=linewidth_)
     plt.plot(data["position"], data["obs_filtered_velocity"],label="Obstacle Avoidance Velocity", color="purple", linewidth=linewidth_)
     plt.plot(data["position"], data["jerk_filtered_velocity"],label="Jerk Filtered Velocity", color="orange", linewidth=linewidth_)
-    plt.xlabel("s [m]", fontsize=50)
-    plt.ylabel("velocity [m/s]", fontsize=50)
-    plt.tick_params(labelsize=50)
-    plt.legend(fontsize=15)
+    plt.xlabel("s [m]", fontsize=20)
+    plt.ylabel("velocity [m/s]", fontsize=20)
+    plt.tick_params(labelsize=20)
+    plt.legend(fontsize=20)
 
     userhome = os.path.expanduser('~')
     desktop_path = userhome + '/Desktop/'

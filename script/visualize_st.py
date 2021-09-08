@@ -25,17 +25,17 @@ if __name__ == '__main__':
     matplotlib.rcParams['pdf.fonttype'] = 42
     matplotlib.rcParams['ps.fonttype'] = 42
 
-    fig = plt.figure(figsize=(15, 12))
+    fig = plt.figure(figsize=(20, 10))
     ax1 = fig.add_subplot(111)
 
     ax1.plot(obs_data['obs_time'], obs_data['obs_s'], label="Obstacle", color="black", linewidth=linewidth_, linestyle="dashed")
     ax1.plot(opt_data['max_time'], opt_data['max_position'], label="Original", color="black", linewidth=linewidth_)
-    ax1.plot(opt_data['obs_filtered_time'], opt_data['obs_position'], label="Avoidance", color="purple", linewidth=1.0)
+    ax1.plot(opt_data['obs_filtered_time'], opt_data['obs_position'], label="Avoidance", color="purple", linewidth=linewidth_)
     #ax1.plot(opt_data['jerk_filtered_time'], opt_data['position'], label="Jerk Filter", color="orange", linewidth=linewidth_)
     ax1.plot(opt_data['lp_time'], opt_data['lp_position'], label="LP", color="blue", linewidth=linewidth_)
     ax1.set_xlabel("t [s]", fontsize=50)
     ax1.set_ylabel("s [m]", fontsize=50)
-    ax1.tick_params(labelsize=50)
+    ax1.tick_params(labelsize=40)
     ax1.legend(fontsize=40)
 
     userhome = os.path.expanduser('~')

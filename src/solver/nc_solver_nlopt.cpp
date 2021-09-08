@@ -48,6 +48,8 @@ namespace nlopt
         ub[0] = initial_vel*initial_vel;
         lb[N] = initial_acc;
         ub[N] = initial_acc;
+        lb[2*N-1] = 0.0;
+        ub[2*N-1] = 0.0;
 
         opt.set_lower_bounds(lb);
         opt.set_upper_bounds(ub);
@@ -62,6 +64,7 @@ namespace nlopt
         param.over_v_weight_ = over_v_weight;
         param.over_a_weight_ = over_a_weight;
         param.over_j_weight_ = over_j_weight;
+        param.max_vels_ = max_vels;
         opt.set_min_objective(computeObjective, &param);
 
         //3. Add Equality Constraint
@@ -176,17 +179,19 @@ namespace nlopt
             ub[i] = max_vels[i]*max_vels[i];
         }
 
-        for(int i=N; i<2*N; ++i)
+        for(int i=N; i<2*N-1; ++i)
         {
             lb[i] = amin;
             ub[i] = amax;
         }
 
-        // initial value
+        // initial value and terminal value
         lb[0] = initial_vel*initial_vel;
         ub[0] = initial_vel*initial_vel;
         lb[N] = initial_acc;
         ub[N] = initial_acc;
+        lb[2*N-1] = 0.0;
+        ub[2*N-1] = 0.0;
 
         opt.set_lower_bounds(lb);
         opt.set_upper_bounds(ub);
@@ -198,6 +203,7 @@ namespace nlopt
         param.dim_delta_ = N;
         param.dim_sigma_ = N;
         param.dim_gamma_ = N;
+        param.max_vels_ = max_vels;
         opt.set_min_objective(computeHardObjective, &param);
 
         //3. Add Equality Constraint
@@ -223,6 +229,7 @@ namespace nlopt
         std::vector<double> x(dim, 0.0);
         x[0] = initial_vel*initial_vel;
         x[N] = initial_acc;
+        x[2*N-1] = 0.0;
 
         for(int i=1; i<N; ++i)
             x[i] = ref_vels[i] * ref_vels[i];
@@ -289,11 +296,15 @@ namespace nlopt
         double over_v_weight = param->over_v_weight_;
         double over_a_weight = param->over_a_weight_;
         double over_j_weight = param->over_j_weight_;
+        std::vector<double> max_vels = param->max_vels_;
 
         if(!grad.empty())
         {
             for(int i=0; i<N; ++i)
-                grad[i] = -1.0;
+            {
+                double vmax = std::max(max_vels[i], 0.1);
+                grad[i] = -1.0/(vmax*vmax);
+            }
 
             for(int i=N; i<2*N; ++i)
                 grad[i] = 0.0;
@@ -310,9 +321,12 @@ namespace nlopt
 
         double cost = 0.0;
         for(int i=0; i<N; ++i)
-            cost += -x[i] + over_v_weight*0.5*x[i+2*N]*x[i+2*N]
-                          + over_a_weight*0.5*x[i+3*N]*x[i+3*N]
-                          + over_j_weight*0.5*x[i+4*N]*x[i+4*N];
+        {
+            double vmax = std::max(max_vels[i], 0.1);
+            cost += -x[i]/(vmax*vmax) + over_v_weight*0.5*x[i+2*N]*x[i+2*N]
+                    + over_a_weight*0.5*x[i+3*N]*x[i+3*N]
+                    + over_j_weight*0.5*x[i+4*N]*x[i+4*N];
+        }
 
         return cost;
     }
@@ -323,11 +337,15 @@ namespace nlopt
     {
         ObjectiveParameter* param = reinterpret_cast<ObjectiveParameter*>(parameter);
         int N = param->dim_b_;
+        std::vector<double> max_vels = param->max_vels_;
 
         if(!grad.empty())
         {
             for(int i=0; i<N; ++i)
-                grad[i] = -1.0;
+            {
+                double vmax = std::max(max_vels[i], 0.1);
+                grad[i] = -1.0/(vmax*vmax);
+            }
 
             for(int i=N; i<2*N; ++i)
                 grad[i] = 0.0;
@@ -335,7 +353,10 @@ namespace nlopt
 
         double cost = 0.0;
         for(int i=0; i<N; ++i)
-            cost += -x[i];
+        {
+            double vmax = std::max(max_vels[i], 0.1);
+            cost += -x[i]/(vmax*vmax);
+        }
 
         return cost;
     }

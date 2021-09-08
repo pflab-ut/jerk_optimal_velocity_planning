@@ -15,6 +15,7 @@ namespace nlopt
         double over_v_weight_;
         double over_a_weight_;
         double over_j_weight_;
+        std::vector<double> max_vels_;
     }ObjectiveParameter;
 
     typedef struct

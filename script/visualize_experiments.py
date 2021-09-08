@@ -23,11 +23,11 @@ if __name__ == '__main__':
     matplotlib.rcParams['ps.fonttype'] = 42
 
     linewidth_ = 8.5
-    fontsize_ = 86
-    legend_size_ = 65
+    fontsize_ = 65
+    legend_size_ = 55
     markersize_ = 20
 
-    fig = plt.figure(figsize=(30, 60))
+    fig = plt.figure(figsize=(30, 30))
     ax1 = fig.add_subplot(311)
     ax2 = fig.add_subplot(312)
     ax3 = fig.add_subplot(313)
@@ -38,7 +38,6 @@ if __name__ == '__main__':
     #ax1.plot(obs_filtered_data['position'], obs_filtered_data['original_velocity'], label="Maximum Velocity", color="black", linewidth=linewidth_)
     ax1.plot(data["position"], data["obs_filtered_velocity"], color="purple", label="Obstacle Avoidance Velocity", linewidth=linewidth_, linestyle="dashed")
     ax1.plot(data["position"], data["jerk_filtered_velocity"], color="orange", label="Jerk Filtered Velocity", linewidth=linewidth_, linestyle="dashed")
-    ax1.set_xlabel("s [m]", fontsize=fontsize_)
     ax1.set_ylabel("velocity [m/s]", fontsize=fontsize_)
     ax1.tick_params(labelsize=fontsize_)
     #ax1.legend(fontsize=legend_size_)
@@ -47,7 +46,6 @@ if __name__ == '__main__':
     ax2.plot(data['position'], data['lp_acceleration'], color="blue",linewidth=linewidth_)
     ax2.plot(data['position'], data['nc_acceleration'], color="red", linewidth=linewidth_,)
     ax2.plot(data['position'], data['qp_acceleration'], color="green", linewidth=linewidth_,)
-    ax2.set_xlabel("s [m]", fontsize=fontsize_)
     ax2.set_ylabel("acceleration [m/s^2]", fontsize=fontsize_)
     ax2.tick_params(labelsize=fontsize_)
     #ax2.legend(fontsize=legend_size_)
