@@ -48,7 +48,6 @@ if __name__ == '__main__':
     ax2.plot(data['position'], data['qp_acceleration'], color="green", linewidth=linewidth_,)
     ax2.set_ylabel("acceleration [m/s^2]", fontsize=fontsize_)
     ax2.tick_params(labelsize=fontsize_)
-    #ax2.legend(fontsize=legend_size_)
 
     ax3.plot(data['position'], data['lp_jerk'], color="blue", linewidth=linewidth_)
     ax3.plot(data['position'], data['nc_jerk'], color="red", linewidth=linewidth_,)
@@ -58,7 +57,6 @@ if __name__ == '__main__':
     ax3.set_xlabel("s [m]", fontsize=fontsize_)
     ax3.set_ylabel("jerk [m/s^3]", fontsize=fontsize_)
     ax3.tick_params(labelsize=fontsize_)
-    ax3.legend(fontsize=legend_size_)
 
     userhome = os.path.expanduser('~')
     desktop_path = userhome + '/Desktop/'
