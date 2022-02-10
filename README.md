@@ -45,7 +45,7 @@ python3 visualize_st.py
 
 ## On Board Experiment Result
 - Stopping Scenario
-<img src="https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/cut_in.eps" width=50%>
+<img src="https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/cut_in.png" width=50%>
 
 ## Author
 Yutaka Shimizu: yutaka.shimizu@pf.is.s.u-tokyo.ac.jp  
