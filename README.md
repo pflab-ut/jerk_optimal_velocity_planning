@@ -43,6 +43,10 @@ python3 visualize_st.py
 - Scenario Stop
 <img src="https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/stop_scenario.png" width=50%>
 
+## On Board Experiment Result
+- Stopping Scenario
+<img src="https://github.com/pflab-ut/jerk_optimal_velocity_planning/blob/master/media/cut_in.png" width=50%>
+
 ## Author
 Yutaka Shimizu: yutaka.shimizu@pf.is.s.u-tokyo.ac.jp  
 If you have any questions about the code or paper, feel free to contact the author either through Issues or email.
