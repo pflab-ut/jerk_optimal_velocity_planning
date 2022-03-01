@@ -1,7 +1,7 @@
 # Jerk Constraint Velocity Planning for an Autonomous Vehicle: Linear Programming Approach
 
 ## Paper
-Coming Soon.
+Our work is going to be presented at ICRA 2022. You can find the paper from [here](https://arxiv.org/abs/2202.10029). 
 
 ## Dependencies. 
 This code has been tested on OSX, but the author is working to test the code on Ubuntu18.04/20.04. External dependencies are 
