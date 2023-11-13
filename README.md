@@ -5,7 +5,7 @@ Our work is going to be presented at ICRA 2022. You can find the paper from [her
 
 ## Dependencies. 
 This code has been tested on OSX, but the author is working to test the code on Ubuntu18.04/20.04. External dependencies are 
-- Gurobi 9.1
+- Gurobi 10.0
 - NLOPT
 - Eigen3
 - OSQP
